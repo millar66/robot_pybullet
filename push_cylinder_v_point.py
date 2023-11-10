@@ -143,9 +143,9 @@ def FindABetterU(Velocity,cost,cylinder_robot_Id,cylinder_target_Id):
         # print("velocity_with_noise[index]:",velocity_with_noise[index])
         return velocity_with_noise[index],cost_with_noise[index]
     else:
-        # print("cost_with_noise[index]>:",cost_with_noise[index],"cost:",cost)
+        print("cost_with_noise[index]>:",cost_with_noise[index],"cost:",cost)
         # print("Velocity2:",Velocity)
-        print("velocity_with_noise[index]:",velocity_with_noise[index])
+        # print("velocity_with_noise[index]:",velocity_with_noise[index])
         return Velocity,cost
 
 def AddNoiseOnU(VelocityNoise):
