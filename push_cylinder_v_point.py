@@ -104,7 +104,7 @@ def RollOut(Velocity,cylinder_robot_Id,cylinder_target_Id,path):
         target_x = cylinder_target_data[0][0]
         target_y = cylinder_target_data[0][1]
         path_x = path[i][0]
-        path_y = path[i][1]    
+        path_y = path[i][1]
         distance.append(ComputeDistance(path_x,path_y,target_x,target_y))
     #每一段cost加和
     length = len(distance)

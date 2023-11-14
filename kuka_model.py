@@ -23,15 +23,16 @@ import matplotlib.pyplot as plt
 
 # %%
 physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
+
 # %%
 def SetSimulation():
     p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
     p.setGravity(0,0,-9.81)#设置重力
 
-    p.resetDebugVisualizerCamera(cameraDistance=1.4,\
-                                 cameraYaw=-1.4,\
-                                 cameraPitch=-23.6,\
-                                 cameraTargetPosition=[-0.18,0.32,0.55])#转变视角
+    p.resetDebugVisualizerCamera(cameraTargetPosition=[0.11,0.5,0.25],\
+                             cameraDistance=7,\
+                             cameraPitch=-35.8,\
+                             cameraYaw=-118.05) #转变视角
 
     #load and set real robot
     cylinder_real_robot_start_pos = [0, 0, 0]
@@ -62,6 +63,12 @@ def getJointStates(robot):
 def getMotorJointStates(robot):
     joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
     joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
+    
+    # 可以使用的关节
+    available_joints_indexes = [i for i in range(p.getNumJoints(robot)) if joint_infos[2] != p.JOINT_FIXED]
+    # print("joint name: ",[joint_infos[i][1] for i in available_joints_indexes])
+    # print("can use joint: ",[joint_infos[i][2] for i in available_joints_indexes])
+
     # info[3] : JOINT_REVOLUTE, JOINT_PRISMATIC, JOINT_SPHERICAL, JOINT_PLANAR, JOINT_FIXED
     # a = [i[3] for i in joint_infos]
     joint_states = [j for j, i in zip(joint_states, joint_infos) if i[3] > -1]
@@ -156,11 +163,19 @@ for j in range(3):
     
     	#机器人手臂的移动
         setJointPosition(kuka_robot_id[0], targetPositionsJoints)
+        # location, _ = p.getBasePositionAndOrientation(kuka_robot_id[0])
+        # p.resetDebugVisualizerCamera(
+        #     cameraDistance=3,
+        #     cameraYaw=110,
+        #     cameraPitch=-30,
+        #     cameraTargetPosition=location
+        # )
+        p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)  #平滑视觉渲染
         p.stepSimulation()
         time.sleep(1./240.)
 
 # %%
-p.disconnect()#有连接就有断开
+p.disconnect()
 
 # %%
 # https://python.hotexamples.com/examples/pybullet/-/setJointMotorControlArray/python-setjointmotorcontrolarray-function-examples.html
@@ -183,3 +198,26 @@ p.disconnect()#有连接就有断开
   #   time.sleep(0.01)
   #   distance=5
   #   yaw = 0
+  
+# 有的时候，我们希望能够禁用一些关节马达，那么我们可以通过将这个马达的force设为0来达到目的。这也就是官方文档提到的东西：
+
+# maxForce = 0
+# mode = p.VELOCITY_CONTROL
+# p.setJointMotorControl2(objUid, jointIndex,
+#  	controlMode=mode, force=maxForce)
+
+# 在搭建模拟环境测试算法时，有时在调试过程中我们会需要能够知道模拟的过程中发生了什么，
+# 毕竟我们不可能每时每刻都在电脑旁，而且训练时一般是不会开渲染的。pybullet中提供了几个保存当前环境状态的函数，
+# saveState, saveBullet, restoreState。不同之处在于saveState会将目前模拟器的状态保存到内存中，
+# 让这段程序后面可以随时读取内存中的这个模拟器状态，然后载入这个存档，因此saveState只需要指定模拟器环境ID，
+# 返回一个状态ID；而saveBullet则是将状态保存到磁盘上，需要接受模拟器ID和路径。
+
+# 除此之外，startStateLogging还能将记录存成json等文件格式。
+# 而saveState和saveBullet保存的状态都可以由restoreState读取
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "log/robotmove.mp4")
+
+# """
+# 能够渲染的代码片段
+# """
+
+# p.stopStateLogging(log_id)
