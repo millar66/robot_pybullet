@@ -23,7 +23,7 @@ robot_id = p.loadURDF("r2d2.urdf", basePosition=[0, 0, 0.5])
 
 # 配置渲染逻辑
 p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 0)
-p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0)
 
 p.resetDebugVisualizerCamera(cameraTargetPosition=[0,0,0],\
                              cameraDistance=6.8,\
@@ -111,7 +111,7 @@ p.removeUserDebugItem(Destination_id)
 p.disconnect(cid)
 
 # %%
-#基于内置的OpenGL图形渲染器，pybullet可以使用线框视角（wireframe），直接按下w就可以切换线框视角。
+# 按下“W”切换线框视角，按下“G”打开或关闭GUI组件。我们还可以自定义键盘事件和鼠标事件。
 p.setDebugObjectColor(
     objectUniqueId=robot_id,
     linkIndex=-1,
