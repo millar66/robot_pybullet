@@ -224,6 +224,21 @@ class Robot_info :
                 [6]worldLinkLinearVelocity: {link_info[6]}\n\
                 [7]worldLinkAngularVelocity: {link_info[7]}\n\n")
                 
+    def getInertial(self, joint_id,xml_obj):
+        """ get inertial data. """
+        mass = xml_obj.getElementsByTagName("mass")[joint_id].getAttribute("value")
+        ixx  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixx")
+        ixy  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixy")
+        ixz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixz")
+        iyy  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("iyy")
+        iyz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("iyz")
+        izz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("izz")
+        xyz  = xml_obj.getElementsByTagName("inertial")[joint_id].getElementsByTagName("origin")[0].getAttribute("xyz")
+        xyz  = xyz.split(" ")
+        xyz  = np.array(xyz,dtype=np.float32)
+        data = [float(mass),float(ixx),float(iyy),float(izz),float(ixy),float(ixz),float(iyz),xyz[0],xyz[1],xyz[2]]
+        return data
+
 class CameraOperate :
     
     def __init__(self, robot_id : int, width : int = 224, height : int = 224, physicsClientId : int = 0):
