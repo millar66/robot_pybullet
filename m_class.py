@@ -15,6 +15,11 @@ import math
 from pprint import pprint
 import numpy as np
 
+import os
+import xml.etree.ElementTree as ET
+import shutil
+import xml.dom.minidom
+
 # 创建 Thread 的子类
 class Thread_print(Thread):
 #    def __init__(self, func, args):
@@ -224,20 +229,114 @@ class Robot_info :
                 [6]worldLinkLinearVelocity: {link_info[6]}\n\
                 [7]worldLinkAngularVelocity: {link_info[7]}\n\n")
                 
-    def getInertial(self, joint_id,xml_obj):
+    def getInertial(self, joint_id):
         """ get inertial data. """
-        mass = xml_obj.getElementsByTagName("mass")[joint_id].getAttribute("value")
-        ixx  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixx")
-        ixy  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixy")
-        ixz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("ixz")
-        iyy  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("iyy")
-        iyz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("iyz")
-        izz  = xml_obj.getElementsByTagName("inertia")[joint_id].getAttribute("izz")
-        xyz  = xml_obj.getElementsByTagName("inertial")[joint_id].getElementsByTagName("origin")[0].getAttribute("xyz")
+        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf")
+
+        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf"):
+            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf",
+                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
+        xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
+
+        mass = xmlDoc.getElementsByTagName("mass")[joint_id].getAttribute("value")
+        ixx  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("ixx")
+        ixy  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("ixy")
+        ixz  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("ixz")
+        iyy  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("iyy")
+        iyz  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("iyz")
+        izz  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("izz")
+        xyz  = xmlDoc.getElementsByTagName("inertial")[joint_id].getElementsByTagName("origin")[0].getAttribute("xyz")
         xyz  = xyz.split(" ")
         xyz  = np.array(xyz,dtype=np.float32)
         data = [float(mass),float(ixx),float(iyy),float(izz),float(ixy),float(ixz),float(iyz),xyz[0],xyz[1],xyz[2]]
+        link_count = xmlDoc.getElementsByTagName("link").length
+        joint_count = xmlDoc.getElementsByTagName("joint").length
+        print("joint_count= ", joint_count)
+        print("mass= ", data[0])
+        print("质心X：", data[7])
+        print("质心y：", data[8])
+        print("质心z：", data[9])
         return data
+
+class ParameterInit :
+    
+    def pos_lim():
+        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf")
+
+        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf"):
+            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf",
+                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
+
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
+        root = tree.getroot()
+        elements = root.findall('joint')
+        joint_limit = [elements[i].findall('limit') for i in range(11)]
+
+        numJoints = 11
+        joint_lower = [0] * numJoints
+        joint_upper = [0] * numJoints
+        joint_effort = [0] * numJoints
+        joint_velocity = [0] * numJoints
+        for i in range(numJoints):
+            joint_lower[i] = joint_limit[i][0].get('lower')
+            joint_upper[i] = joint_limit[i][0].get('upper')
+            joint_effort[i] = joint_limit[i][0].get('effort')
+            joint_velocity[i] = joint_limit[i][0].get('velocity')
+        # pprint(joint_lower)
+        # pprint(joint_upper)
+        # pprint(joint_effort)
+        # pprint(joint_velocity)
+
+        joint_limit[0][0].set('lower', '-3.14')
+        joint_limit[1][0].set('lower', '-3.14')
+        joint_limit[2][0].set('lower', '-3.14')
+        joint_limit[3][0].set('lower', '-3.14')
+        joint_limit[4][0].set('lower', '-3.14')
+        joint_limit[5][0].set('lower', '-3.14')
+        joint_limit[6][0].set('lower', '-0.1')
+        joint_limit[7][0].set('lower', '-3.14')
+        joint_limit[8][0].set('lower', '-3.14')
+        joint_limit[9][0].set('lower', '-3.14')
+        joint_limit[10][0].set('lower', '-3.14')
+        joint_limit[0][0].set('upper', '3.14')
+        joint_limit[1][0].set('upper', '3.14')
+        joint_limit[2][0].set('upper', '3.14')
+        joint_limit[3][0].set('upper', '3.14')
+        joint_limit[4][0].set('upper', '3.14')
+        joint_limit[5][0].set('upper', '3.14')
+        joint_limit[6][0].set('upper', '0.1')
+        joint_limit[7][0].set('upper', '3.14')
+        joint_limit[8][0].set('upper', '3.14')
+        joint_limit[9][0].set('upper', '3.14')
+        joint_limit[10][0].set('upper', '3.14')
+        joint_limit[0][0].set('effort', '100')
+        joint_limit[1][0].set('effort', '100')
+        joint_limit[2][0].set('effort', '100')
+        joint_limit[3][0].set('effort', '100')
+        joint_limit[4][0].set('effort', '100')
+        joint_limit[5][0].set('effort', '100')
+        joint_limit[6][0].set('effort', '100')
+        joint_limit[7][0].set('effort', '100')
+        joint_limit[8][0].set('effort', '100')
+        joint_limit[9][0].set('effort', '100')
+        joint_limit[10][0].set('effort', '100')
+        joint_limit[0][0].set('velocity', '100')
+        joint_limit[1][0].set('velocity', '100')
+        joint_limit[2][0].set('velocity', '100')
+        joint_limit[3][0].set('velocity', '100')
+        joint_limit[4][0].set('velocity', '100')
+        joint_limit[5][0].set('velocity', '100')
+        joint_limit[6][0].set('velocity', '100')
+        joint_limit[7][0].set('velocity', '100')
+        joint_limit[8][0].set('velocity', '100')
+        joint_limit[9][0].set('velocity', '100')
+        joint_limit[10][0].set('velocity', '100')
+
+        tree.write('./site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/modified.urdf')
+
+        
 
 class CameraOperate :
     

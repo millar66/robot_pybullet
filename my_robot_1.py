@@ -15,7 +15,7 @@ sys.path.append('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet')
 import pybullet as p
 import pybullet_data
 from time import sleep
-from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate
+from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate, ParameterInit
 # import m_class
 from queue import Queue
 from threading import Event
@@ -42,6 +42,7 @@ event.clear()
 thread.join()
 print("init end")
 sleep(0.1)
+ParameterInit.pos_lim()
 
 use_gui = True
 if use_gui:
@@ -62,7 +63,7 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF("plane.urdf", useMaximalCoordinates=False)
-robot_id = p.loadURDF("./aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+robot_id = p.loadURDF("./aaa/000PSM_10.SLDASM/urdf/modified.urdf",
                       basePosition=[0, 0, 0], useMaximalCoordinates=False)
 
 # 重置base连杆质心的位置和姿态。
@@ -194,8 +195,8 @@ print("RobotEndEffectorIndex:",RobotEndEffectorIndex)
 
 robotEndOrientation = p.getQuaternionFromEuler([0,0,-1.57])
 # targetPositionsJoints=[0,-1.57/2,1.57/2,0,-1.57,0,0,0,0,0,0,0,0,1.57]
-targetPositionsJoints=[0,-1.57/2,1.57/2,-0.5,-1.57,0,0,0,0,0,0]
-setJointPosition(robot_id, targetPositionsJoints, 11)
+# targetPositionsJoints=[0,-1.57/2,1.57/2,-0.5,-1.57,0,0,0,0,0,0]
+# setJointPosition(robot_id, targetPositionsJoints, 11)
 # for i in range(240):
 #     p.stepSimulation()
 #     sleep(1./240.)
@@ -248,9 +249,11 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 # p.setJointMotorControl2(robot_id, 6, p.POSITION_CONTROL, targetPosition=0, force=200)
 # sleep(1./24.)
 
-targetPosition_init = [3, 0.3, 3, 5.5, 1.6, 0.5, 0, 3, 3, 3, 3]
+# targetPosition_init = [3, 0.3, 3, 5.5, 1.6, 0.5, 0, 3, 3, 3, 3]
+targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 setJointPosition(robot_id, targetPosition_init, 11)
 
+# %%
 RobotEndEffectorIndex = 6
 result = p.getLinkState(robot_id,
                         RobotEndEffectorIndex,
@@ -271,7 +274,7 @@ j = 0
 i = 0
 print(org_link_trn)
 
-for j in range(15):
+for j in range(5):
     step_flag = 0
     org_link_trn_new = last_link_trn
     if j % 2 == 0:
@@ -326,8 +329,9 @@ for j in range(15):
         #     if targetPositionsJoints[i] < 0 :
         #         print('err******', i, targetPositionsJoints[i])
         for i in range(len(joint_ik)):
-            if joint_ik[i] < 0 :
-                print('err******', i, joint_ik[i])
+            if joint_ik[i] < -3.14 or  joint_ik[i] > 3.14:
+                if i != 7:
+                    print('err******', i, joint_ik[i])
             
     	#机器人手臂的移动
         # setJointPosition(robot_id, targetPositionsJoints[0:11])
@@ -339,38 +343,9 @@ for j in range(15):
         #     cameraPitch=-30,
         #     cameraTargetPosition=location
         # )
-        p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)  #平滑视觉渲染
+        # p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)  #平滑视觉渲染
         p.stepSimulation()
         sleep(1./240.)
-
-# %%
-joint_mass_info = Robot_info(robot_id)
-# b = a.getInertial(robot_id, xmlDoc)
-
-shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
-                "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf")
-
-if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf"):
-    os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf",
-               "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
-
-xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
-link_count = xmlDoc.getElementsByTagName("link").length
-joint_count = xmlDoc.getElementsByTagName("joint").length
-print(joint_count)
-data = joint_mass_info.getInertial(robot_id, xmlDoc)
-print(data[0])
-print(data[7])
-print(data[8])
-print(data[9])
-
-
-
-
-
-
-
-
 
 # %%
 p.removeUserDebugItem(debug_line_id)
