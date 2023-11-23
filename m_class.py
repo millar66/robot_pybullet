@@ -20,6 +20,8 @@ import xml.etree.ElementTree as ET
 import shutil
 import xml.dom.minidom
 
+import re
+
 # 创建 Thread 的子类
 class Thread_print(Thread):
 #    def __init__(self, func, args):
@@ -231,12 +233,6 @@ class Robot_info :
                 
     def getInertial(self, joint_id):
         """ get inertial data. """
-        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
-                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf")
-
-        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf"):
-            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf",
-                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
         xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
 
         mass = xmlDoc.getElementsByTagName("mass")[joint_id].getAttribute("value")
@@ -295,7 +291,7 @@ class ParameterInit :
         joint_limit[3][0].set('lower', '-3.14')
         joint_limit[4][0].set('lower', '-3.14')
         joint_limit[5][0].set('lower', '-3.14')
-        joint_limit[6][0].set('lower', '-0.1')
+        joint_limit[6][0].set('lower', '-0.2')
         joint_limit[7][0].set('lower', '-3.14')
         joint_limit[8][0].set('lower', '-3.14')
         joint_limit[9][0].set('lower', '-3.14')
@@ -306,7 +302,7 @@ class ParameterInit :
         joint_limit[3][0].set('upper', '3.14')
         joint_limit[4][0].set('upper', '3.14')
         joint_limit[5][0].set('upper', '3.14')
-        joint_limit[6][0].set('upper', '0.1')
+        joint_limit[6][0].set('upper', '0.2')
         joint_limit[7][0].set('upper', '3.14')
         joint_limit[8][0].set('upper', '3.14')
         joint_limit[9][0].set('upper', '3.14')
@@ -334,9 +330,73 @@ class ParameterInit :
         joint_limit[9][0].set('velocity', '100')
         joint_limit[10][0].set('velocity', '100')
 
-        tree.write('./site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/modified.urdf')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/modified.urdf')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
 
+class DHParameter :
+    
+    # def __init__(self, getPosOrn):
+    #     self.getPosOrn = getPosOrn
+    
+    def getPosOrn(self):
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
+        root = tree.getroot()
+        elements = root.findall('joint')
+        joint_origin_list = [elements[i].findall('origin') for i in range(11)]
         
+        numJoints = 11
+        joint_pos = [0] * numJoints
+        joint_orn = [0] * numJoints
+        for i in range(numJoints):
+            joint_pos[i] = joint_origin_list[i][0].get('xyz')
+            joint_orn[i] = joint_origin_list[i][0].get('rpy')
+
+        joint_pos_str = [''] * 3
+        joint_pos_float = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                           [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                           [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+        for i in range(numJoints):
+            for j in range(3):
+                for item in joint_pos[i]:
+                    if item.isspace():
+                        joint_pos[i] = joint_pos[i][1:]
+                        break
+                    else:
+                        joint_pos_str[j] = joint_pos_str[j] + item
+                        joint_pos[i] = joint_pos[i][1:]
+                joint_pos_float[i][j] = float(joint_pos_str[j])
+                joint_pos_str = [''] * 3
+        joint_pos_float_np = np.array(joint_pos_float)
+        print('*' *20)
+        print('joint_pos_float= ', )
+        pprint(joint_pos_float_np)
+
+        joint_orn_str = [''] * 3
+        joint_orn_float = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                           [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+                           [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+        for i in range(numJoints):
+            for j in range(3):
+                for item in joint_orn[i]:
+                    if item.isspace():
+                        joint_orn[i] = joint_orn[i][1:]
+                        break
+                    else:
+                        joint_orn_str[j] = joint_orn_str[j] + item
+                        joint_orn[i] = joint_orn[i][1:]
+                joint_orn_float[i][j] = float(joint_orn_str[j])
+                joint_orn_str = [''] * 3
+        joint_orn_float_np = np.array(joint_orn_float)
+        print('*' *20)
+        print('joint_orn_float= ')
+        pprint(joint_orn_float_np)
+        return joint_pos_float_np, joint_orn_float_np
+
+    def DH_compute(self):
+        Pos, Orn = self.getPosOrn()
+
 
 class CameraOperate :
     
