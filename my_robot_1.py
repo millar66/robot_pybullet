@@ -14,7 +14,8 @@ import sys
 sys.path.append('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet')
 import pybullet as p
 import pybullet_data
-from time import sleep
+from time import sleep, time
+import timeit
 from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate, ParameterInit, DHParameter
 # import m_class
 from queue import Queue
@@ -30,6 +31,8 @@ import copy
 import matplotlib  
 import matplotlib.pyplot as plt  
 
+
+
 event = Event()
 print_text_queue = Queue(50)
 print_content_queue = Queue(50)
@@ -42,7 +45,11 @@ event.clear()
 thread.join()
 print("init end")
 sleep(0.1)
+# %%time
+%time
 ParameterInit.pos_lim()
+# timer = timeit.default_timer()
+# print(timer)
 
 use_gui = True
 if use_gui:
@@ -63,16 +70,25 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF("plane.urdf", useMaximalCoordinates=False)
-robot_id = p.loadURDF("./aaa/000PSM_10.SLDASM/urdf/modified.urdf",
+robot_id = p.loadURDF("./ccc/000PSM_10.SLDASM/urdf/modified.urdf",
                       basePosition=[0, 0, 0], useMaximalCoordinates=False, useFixedBase=True)
 
+targetPosition_init = [0, -0, 0, -0, 0, 0, 0, 0, 0, 0, 0]
+p.setJointMotorControlArray(robot_id,
+                            range(11),
+                            p.POSITION_CONTROL,
+                            targetPositions=targetPosition_init)
+set_robot = SetSimulation(robot_id)
+set_robot.Set_init_my_robot()
+# Pos, Orn = p.getBasePositionAndOrientation(robot_id) # 返回两个列表，第一个：base连杆的位置，第二个：base的姿态四元数
+# print(f"机器人的base位置坐标为:{Pos}\n机器人的base姿态四元数为:{Orn}")
+coordinate_pos, coordinate_orn = DHParameter().getPosOrn()
+p.addUserDebugPoints(pointPositions=[coordinate_pos[0]], pointColorsRGB=[[1,0,0]], pointSize=5)
 # 重置base连杆质心的位置和姿态。
 # startPos = [0, 0, 1]
 # startOrientation = p.getQuaternionFromEuler([0, 0, 0])
 # p.resetBasePositionAndOrientation(robot_id, startPos, startOrientation)  # 没有返回参数
 
-set_robot = SetSimulation(robot_id)
-set_robot.Set_init_my_robot()
 
 # p.changeDynamics(bodyUniqueId=robot_id, linkIndex=3, restitution=0.5, contactStiffness=10**8, contactDamping=10**5)
 # for i in range(numJoints):
@@ -95,9 +111,6 @@ set_robot.Set_init_my_robot()
 # p.changeConstraint(one_id, maxForce=10000000)
 
 # p.removeConstraint(one_id) # 移除约束
-
-set_robot = SetSimulation(robot_id)
-set_robot.Set_init_my_robot()
 
 numJoints = p.getNumJoints(robot_id, physicsClientId)
 print("连杆信息: ")
@@ -137,9 +150,6 @@ robot_name = robot_name.decode("utf8")  # floor_obj
 
 # 获取机器人base连杆质心在世界坐标系中的位置和姿态四元数，
 # 返回3个浮点数表示的位置列表和4个浮点数表示的姿态列表[x、y、z、w]。单位为米和弧度。
-Pos, Orn = p.getBasePositionAndOrientation(robot_id) # 返回两个列表，第一个：base连杆的位置，第二个：base的姿态四元数
-print(f"机器人的base位置坐标为:{Pos}\n机器人的base姿态四元数为:{Orn}")
-
 
 a = CameraOperate(robot_id)
 width, height, rgbImg, depthImg, segImg = a.setCameraPicAndGetPic()
@@ -214,24 +224,45 @@ robotEndOrientation = p.getQuaternionFromEuler([0,0,-1.57])
 # p.setJointMotorControl2(robot_id,1,p.POSITION_CONTROL,targetPosition=0.2,force=80)
 # sleep(1./24.)
 # p.setJointMotorControl2(robot_id,1,p.POSITION_CONTROL,targetPosition=0,force=80)
+p.removeAllUserDebugItems()
 
-# for i in range(240*3):
-#     targetPosition = 3 * math.sin(2 * math.pi * 0.4 * i / 240)
-#     p.setJointMotorControl2(robot_id,1,p.POSITION_CONTROL,targetPosition=targetPosition,force=80)
-#     sleep(1./240.)
+# %%
+joint_index = 4
+targetPosition_init = [0, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
+setJointPosition(robot_id, targetPosition_init, 11)
+sleep(1.)
+result = p.getLinkState(robot_id,
+                        RobotEndEffectorIndex,
+                        computeLinkVelocity=1,
+                        computeForwardKinematics=1)
+link_trn = result[0]
+last_link_trn = link_trn
+p.addUserDebugText(text="start", textPosition=link_trn, textColorRGB=[0, 1, 0], textSize=1.2)
+joint_state = p.getJointStates(robot_id, [joint_index])[0][0]
+for i in range(240*4):
+    targetPosition = joint_state + 0.5 * math.sin(2 * math.pi * 1 * i / 240)
+    p.setJointMotorControl2(robot_id,joint_index,p.POSITION_CONTROL,targetPosition=targetPosition,force=80)
+    result = p.getLinkState(robot_id,
+                            RobotEndEffectorIndex,
+                            computeLinkVelocity=1,
+                            computeForwardKinematics=1)
+    link_trn = result[0]
+    debug_line_id = p.addUserDebugLine(last_link_trn,link_trn,lineColorRGB=[0,0,1],lineWidth=2)
+    last_link_trn = link_trn
+    sleep(1./240.)
 
-set_robot = SetSimulation(robot_id)
-set_robot.Set_init_my_robot()
+# set_robot = SetSimulation(robot_id)
+# set_robot.Set_init_my_robot()
 
 # %%
 # p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 #                              cameraDistance=1.20,\
 #                              cameraPitch=-19.20,\
 #                              cameraYaw=-113.60) #转变视角
-p.resetDebugVisualizerCamera(cameraTargetPosition=[-0.03,-0.83,0.42],\
-                             cameraDistance=1.60,\
-                             cameraPitch=-9.20,\
-                             cameraYaw=-167.60) #转变视角
+p.resetDebugVisualizerCamera(cameraTargetPosition=[0.14,0.25,0.25],\
+                             cameraDistance=1.00,\
+                             cameraPitch=--30.40,\
+                             cameraYaw=24.4) #转变视角
 
 # for i in range(numJoints):
 #     p.setJointMotorControl2(robot_id, i, p.POSITION_CONTROL, targetPosition=1, force=200)
@@ -253,13 +284,14 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[-0.03,-0.83,0.42],\
 # p.setJointMotorControl2(robot_id, 6, p.POSITION_CONTROL, targetPosition=0, force=200)
 # sleep(1./24.)
 
+# %%
 # targetPosition_init = [3, 0.3, 3, 5.5, 1.6, 0.5, 0, 3, 3, 3, 3]
-targetPosition_init = [0, -0.3, 0, -0.5, 0, 0, 0, 0, 0, 0, 0]
+targetPosition_init = [0, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
 setJointPosition(robot_id, targetPosition_init, 11)
+sleep(2.)
 p.removeAllUserDebugItems()
 
-# %%
-RobotEndEffectorIndex = 2
+RobotEndEffectorIndex = 8
 result = p.getLinkState(robot_id,
                         RobotEndEffectorIndex,
                         computeLinkVelocity=1,
@@ -280,6 +312,7 @@ i = 0
 print(org_link_trn)
 
 # %%
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/axis_x_move_err2.mp4")
 for j in range(6):
     step_flag = 0
     org_link_trn_new = last_link_trn
@@ -304,14 +337,9 @@ for j in range(6):
         last_link_trn = link_trn
     
     	#机器人手臂末端移动路线的修正
-        # delat_x = org_link_trn_new[0] + (step_flag * move_step) - link_trn[0]
-        # delat_y = org_link_trn_new[1] + step_flag * 0 - link_trn[1]
-        # delat_z = org_link_trn_new[2] + step_flag * 0 - link_trn[2]
         delat_x = org_link_trn_new[0] + (step_flag * move_step)
-        # delat_y = org_link_trn_new[1] + (step_flag * move_step)
-        # delat_z = org_link_trn_new[2] + (step_flag * move_step)
-        # delat_y = org_link_trn_new[1] + step_flag * 0
-        # delat_z = org_link_trn_new[2] + step_flag * 0
+        delat_y = org_link_trn_new[1] + (step_flag * move_step)
+        delat_z = org_link_trn_new[2] + (step_flag * move_step)
         movement_vector = [delat_x,delat_y,delat_z]
         # print("movement_vector:",movement_vector)
         # print("org_link_trn_new:",org_link_trn_new)
@@ -322,17 +350,17 @@ for j in range(6):
         #print("movement_vector:",movement_vector)
     	
     	#计算雅可比矩阵
-        # jac_t, jac_r = p.calculateJacobian(robot_id, RobotEndEffectorIndex, com_trn, mpos, zero_vec, zero_acc)
+        jac_t, jac_r = p.calculateJacobian(robot_id, RobotEndEffectorIndex, com_trn, mpos, zero_vec, zero_acc)
         
         joint_ik = p.calculateInverseKinematics(robot_id, RobotEndEffectorIndex, movement_vector)
     
     	#我首先没有考虑保持机器人手臂末端方向一致
     	#所以暂时只用到“jac_t”
-        # jac_t_pi = pinv(jac_t)
+        jac_t_pi = pinv(jac_t)
     
         #计算机器人手臂需要调整的角度
-        # expected_delta_q_dot_1 = list(np.dot(jac_t_pi, movement_vector))
-        # targetPositionsJoints = list(np.sum([expected_delta_q_dot_1[0:11], targetPositionsJoints], axis = 0))
+        expected_delta_q_dot_1 = list(np.dot(jac_t_pi, movement_vector))
+        targetPositionsJoints = list(np.sum([expected_delta_q_dot_1[0:11], targetPositionsJoints], axis = 0))
         # for i in range(len(targetPositionsJoints)):
         #     if targetPositionsJoints[i] < 0 :
         #         print('err******', i, targetPositionsJoints[i])
@@ -344,7 +372,7 @@ for j in range(6):
                 print('err******', i, joint_ik[i])
             
     	#机器人手臂的移动
-        # setJointPosition(robot_id, targetPositionsJoints[0:11])
+        # setJointPosition(robot_id, targetPositionsJoints[0:11], 11)
         setJointPosition(robot_id, joint_ik, 11)
         # location, _ = p.getBasePositionAndOrientation(robot_id[0])
         # p.resetDebugVisualizerCamera(
@@ -354,45 +382,49 @@ for j in range(6):
         #     cameraTargetPosition=location
         # )
         # p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)  #平滑视觉渲染
-        p.stepSimulation()
+        # p.stepSimulation()
         sleep(1./240.)
+# p.stopStateLogging(log_id)
 
 # %%
-coordinate_pos, coordinate_orn = DHParameter().getPosOrn()
-
-a_i_1 = x_i
-alpha_i_1 = rpy
-d_i = 
-
-
-
-
-analytical inverse kinematic compytation for 7-DOF redundant manipulators
-
-
-
-
-
-pos_sum = np.cumsum(coordinate_pos, axis=0)
-# %%
-debug_line_id_0_1 = p.addUserDebugLine([0,0,0],pos_sum[0],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_1_2 = p.addUserDebugLine(pos_sum[0],pos_sum[1],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_2_3 = p.addUserDebugLine(pos_sum[1],pos_sum[2],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_3_4 = p.addUserDebugLine(pos_sum[2],pos_sum[3],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_4_5 = p.addUserDebugLine(pos_sum[3],pos_sum[4],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_5_6 = p.addUserDebugLine(pos_sum[4],pos_sum[5],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_6_7 = p.addUserDebugLine(pos_sum[5],pos_sum[6],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_7_8 = p.addUserDebugLine(pos_sum[6],pos_sum[7],lineColorRGB=[1,0,0],lineWidth=8)
-debug_line_id_8_9 = p.addUserDebugLine(pos_sum[7],pos_sum[8],lineColorRGB=[1,0,0],lineWidth=8)
-
 p.removeAllUserDebugItems()
+p.disconnect(physicsClientId)
 
 # %%
-targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-setJointPosition(robot_id, targetPosition_init, 11)
+# coordinate_pos, coordinate_orn = DHParameter().getPosOrn()
 
-p.removeUserDebugItem(debug_line_id)
-p.disconnect(physicsClientId)
+# a_i_1 = x_i
+# alpha_i_1 = rpy
+# d_i = 
+
+
+
+
+# analytical inverse kinematic compytation for 7-DOF redundant manipulators
+
+
+
+
+
+# pos_sum = np.cumsum(coordinate_pos, axis=0)
+# # %%
+# debug_line_id_0_1 = p.addUserDebugLine([0,0,0],pos_sum[0],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_1_2 = p.addUserDebugLine(pos_sum[0],pos_sum[1],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_2_3 = p.addUserDebugLine(pos_sum[1],pos_sum[2],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_3_4 = p.addUserDebugLine(pos_sum[2],pos_sum[3],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_4_5 = p.addUserDebugLine(pos_sum[3],pos_sum[4],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_5_6 = p.addUserDebugLine(pos_sum[4],pos_sum[5],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_6_7 = p.addUserDebugLine(pos_sum[5],pos_sum[6],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_7_8 = p.addUserDebugLine(pos_sum[6],pos_sum[7],lineColorRGB=[1,0,0],lineWidth=8)
+# debug_line_id_8_9 = p.addUserDebugLine(pos_sum[7],pos_sum[8],lineColorRGB=[1,0,0],lineWidth=8)
+
+# p.removeAllUserDebugItems()
+
+# # %%
+# targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# setJointPosition(robot_id, targetPosition_init, 11)
+
+
 
 
 

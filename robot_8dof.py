@@ -259,7 +259,7 @@ setJointPosition(robot_id, targetPosition_init, 11)
 p.removeAllUserDebugItems()
 
 # %%
-RobotEndEffectorIndex = 2
+RobotEndEffectorIndex = 10
 result = p.getLinkState(robot_id,
                         RobotEndEffectorIndex,
                         computeLinkVelocity=1,

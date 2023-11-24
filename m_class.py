@@ -233,7 +233,7 @@ class Robot_info :
                 
     def getInertial(self, joint_id):
         """ get inertial data. """
-        xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
+        xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml")
 
         mass = xmlDoc.getElementsByTagName("mass")[joint_id].getAttribute("value")
         ixx  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("ixx")
@@ -258,19 +258,31 @@ class Robot_info :
 class ParameterInit :
     
     def pos_lim():
-        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
-                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf")
+        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf")
 
-        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf"):
-            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.urdf",
-                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml")
+        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf"):
+            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf",
+                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml")
 
-        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
-        root = tree.getroot()
-        elements = root.findall('joint')
-        joint_limit = [elements[i].findall('limit') for i in range(11)]
-
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
         numJoints = 11
+        root = tree.getroot()
+        elements_joint = root.findall('joint')
+        elements_link = root.findall('link')
+        joint_limit = [elements_joint[i].findall('limit') for i in range(numJoints)]
+        joint_axis = [elements_joint[i].findall('axis') for i in range(numJoints)]
+        joint_origin_list = [elements_joint[i].findall('origin') for i in range(11)]
+        link_2_visual = elements_link[2].findall('visual')
+        link_2_origin = link_2_visual[0].findall('origin')
+        link_2_origin[0].set('rpy',  '0, 0, -0.13')
+        link_7_visual = elements_link[7].findall('visual')
+        link_7_origin = link_7_visual[0].findall('origin')
+        link_7_origin[0].set('rpy',  '1.57, 0, 3.14159')
+        
+        # joint_origin = elements[4].findall('origin')
+        # joint_origin[0].set('xyz', '-2, 0, 0.5')
+
         joint_lower = [0] * numJoints
         joint_upper = [0] * numJoints
         joint_effort = [0] * numJoints
@@ -280,11 +292,54 @@ class ParameterInit :
             joint_upper[i] = joint_limit[i][0].get('upper')
             joint_effort[i] = joint_limit[i][0].get('effort')
             joint_velocity[i] = joint_limit[i][0].get('velocity')
+        joint_xyz = [0] * numJoints
+        for i in range(numJoints):
+            joint_xyz[i] = joint_axis[i][0].get('xyz')
+        joint_pos = [0] * numJoints
+        joint_orn = [0] * numJoints
+        for i in range(numJoints):
+            joint_pos[i] = joint_origin_list[i][0].get('xyz')
+            joint_orn[i] = joint_origin_list[i][0].get('rpy')
+        # pprint(joint_xyz)
         # pprint(joint_lower)
         # pprint(joint_upper)
         # pprint(joint_effort)
         # pprint(joint_velocity)
 
+        joint_origin_list[0][0].set('xyz',  '0.00000 0.00000 0.27985')
+        joint_origin_list[1][0].set('xyz',  '0.00000 0.00000 0.00000')
+        joint_origin_list[2][0].set('xyz',  '0.00000 -0.36330 0.00000')
+        joint_origin_list[3][0].set('xyz',  '0.04951 0.00000 0.00000')
+        joint_origin_list[4][0].set('xyz',  '-0.04951 0.36665 0.00000')
+        joint_origin_list[5][0].set('xyz',  '0.00000 0.00000 0.00000')
+        joint_origin_list[6][0].set('xyz',  '0.00000 0.00000 0.00000')
+        joint_origin_list[7][0].set('xyz',  '0.04050 0.00000 0.55443')
+        joint_origin_list[8][0].set('xyz',   '0.00000 0.00000 0.00000')
+        joint_origin_list[9][0].set('xyz',   '0.01125 0.00000 0.00000')
+        joint_origin_list[10][0].set('xyz' , '0.01125 0.00000 0.00000')
+
+        joint_origin_list[0][0].set('rpy',  '0.00000 0.00000 0.00000')
+        joint_origin_list[1][0].set('rpy', '-1.57079 0.00000 0.00000')
+        joint_origin_list[2][0].set('rpy', '-1.57079 0.00000 3.14159')
+        joint_origin_list[3][0].set('rpy',  '1.57079 0.00000 0.00000')
+        joint_origin_list[4][0].set('rpy', '-1.57079 0.00000 0.00000')
+        joint_origin_list[5][0].set('rpy', '-1.57079 0.00000 3.14159')
+        joint_origin_list[6][0].set('rpy', '-1.57079 0.00000 3.14159')
+        joint_origin_list[7][0].set('rpy', '0.00000 0.00000 -1.57079')
+        joint_origin_list[8][0].set('rpy', '-1.57079 0 0')
+        joint_origin_list[9][0].set('rpy', '0.00000 0.00000 0.00000')
+        joint_origin_list[10][0].set('rpy', '0.00000 0.00000 0.00000')
+        # joint_axis[0][0].set('xyz', '')
+        # joint_axis[1][0].set('xyz', '')
+        # joint_axis[2][0].set('xyz', '')
+        # joint_axis[3][0].set('xyz', '')
+        # joint_axis[4][0].set('xyz', '')
+        # joint_axis[5][0].set('xyz', '')
+        # joint_axis[6][0].set('xyz', '')
+        # joint_axis[7][0].set('xyz', '')
+        # joint_axis[8][0].set('xyz', '')
+        # joint_axis[9][0].set('xyz', '')
+        # joint_axis[10][0].set('xyz', '')
         joint_limit[0][0].set('lower', '-3.14')
         joint_limit[1][0].set('lower', '-3.14')
         joint_limit[2][0].set('lower', '-3.14')
@@ -330,8 +385,8 @@ class ParameterInit :
         joint_limit[9][0].set('velocity', '100')
         joint_limit[10][0].set('velocity', '100')
 
-        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/modified.urdf')
-        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/modified.urdf')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
 
 class DHParameter :
     
@@ -339,7 +394,7 @@ class DHParameter :
     #     self.getPosOrn = getPosOrn
     
     def getPosOrn(self):
-        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/aaa/000PSM_10.SLDASM/urdf/test.xml')
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
         root = tree.getroot()
         elements = root.findall('joint')
         joint_origin_list = [elements[i].findall('origin') for i in range(11)]
@@ -395,7 +450,64 @@ class DHParameter :
         return joint_pos_float_np, joint_orn_float_np
 
     def DH_compute(self):
-        Pos, Orn = self.getPosOrn()
+        pos, orn = self.getPosOrn()
+        Td = np.zeros((numJoints, 4, 4))
+        Tx = np.zeros((numJoints, 4, 4))
+        Ty = np.zeros((numJoints, 4, 4))
+        Tz = np.zeros((numJoints, 4, 4))
+        base_pos = np.array([0, 0, 0, 1])
+        joint_pos = np.zeros((numJoints, 4, 4))
+        joint_orn = np.zeros((numJoints, 4, 4))
+        orn_cos_x = np.zeros(numJoints)
+        orn_sin_x = np.zeros(numJoints)
+        orn_cos_y = np.zeros(numJoints)
+        orn_sin_y = np.zeros(numJoints)
+        orn_cos_z = np.zeros(numJoints)
+        orn_sin_z = np.zeros(numJoints)
+        for i in range(numJoints):
+            orn_cos_x[i] = np.cos(orn[i][0])
+            orn_sin_x[i] = np.sin(orn[i][0])
+            orn_cos_y[i] = np.cos(orn[i][1])
+            orn_sin_y[i] = np.sin(orn[i][1])
+            orn_cos_z[i] = np.cos(orn[i][2])
+            orn_sin_z[i] = np.sin(orn[i][2])
+            Td[i] = np.array([[1, 0, 0, pos[i][0]],
+                              [0, 1, 0, pos[i][1]],
+                              [0, 0, 1, pos[i][2]],
+                              [0, 0, 0, 1        ]])
+            Tx[i] = np.array([[1, 0,            0,               0],
+                              [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
+                              [0, orn_sin_x[i], orn_cos_x[i],    0],
+                              [0, 0,            0,               1]])
+            Ty[i] = np.array([[orn_cos_y[i],    0, orn_sin_y[i], 0],
+                              [0,               1, 0,            0],
+                              [orn_sin_y[i]*-1, 0, orn_cos_y[i], 0],
+                              [0,               0, 0,            1]])
+            Tz[i] = np.array([[orn_cos_z[i], orn_sin_z[i]*-1, 0, 0],
+                              [orn_sin_z[i], orn_cos_z[i],    0, 0],
+                              [0,            0,               1, 0],
+                              [0,            0,               0, 1]])
+            joint_pos[i] = base_pos@Tx[i]@Td[i]@Tz[i]
+            joint_orn[i] = base_pos@Tx[i]@Td[i]@Tz[i]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class CameraOperate :
@@ -405,6 +517,21 @@ class CameraOperate :
         self.width = width
         self.height = height
         self.physicsClientId = physicsClientId
+        
+    # def log_video(self, task_name):
+    #     """
+    #     Logs video of each task being executed
+    #     """
+    #     # if not os.path.exists("video_logs/"):
+    #     #     os.makedirs("video_logs")
+    #     try:
+    #         p.stopStateLogging(self.curr_recording)
+    #         self.video_log_key += 1
+    #     except Exception:
+    #         print("No Video Currently Being Logged")
+    #     self.curr_recording = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4,
+    #                                               "video_logs/task_vid_" +
+    #                                               str(task_name) + "_" + str(self.video_log_key) + ".mp4") 
         
     def setCameraPicAndGetPic(self):
         """
