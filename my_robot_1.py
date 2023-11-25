@@ -16,7 +16,7 @@ import pybullet as p
 import pybullet_data
 from time import sleep, time
 import timeit
-from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate, ParameterInit, DHParameter
+from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate, ParameterInit, DHParameter, robot_control
 # import m_class
 from queue import Queue
 from threading import Event
@@ -50,6 +50,7 @@ sleep(0.1)
 ParameterInit.pos_lim()
 # timer = timeit.default_timer()
 # print(timer)
+robot_control = robot_control()
 
 use_gui = True
 if use_gui:
@@ -155,44 +156,6 @@ a = CameraOperate(robot_id)
 width, height, rgbImg, depthImg, segImg = a.setCameraPicAndGetPic()
 # img = p.getCameraImage(224, 224, renderer=p.ER_BULLET_HARDWARE_OPENGL)
 
-def setJointPosition(robot, position, ctl_num):
-    num_joints = p.getNumJoints(robot)
-    p.setJointMotorControlArray(robot,
-                                range(ctl_num),
-                                p.POSITION_CONTROL,
-                                targetPositions=position)
-    # if len(position) == num_joints: 
-    #     p.setJointMotorControlArray(robot,
-    #                                 range(num_joints),
-    #                                 p.POSITION_CONTROL,
-    #                                 targetPositions=position)
-    # else:
-    #     print("num_joints is not right")
-def getJointStates(robot):
-    joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
-    joint_positions = [state[0] for state in joint_states]
-    joint_velocities = [state[1] for state in joint_states]
-    joint_torques = [state[3] for state in joint_states]
-    return joint_positions, joint_velocities, joint_torques
-
-def getMotorJointStates(robot):
-    joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
-    joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
-    
-    # 可以使用的关节
-    available_joints_indexes = [i for i in range(p.getNumJoints(robot)) if joint_infos[2] != p.JOINT_FIXED]
-    # print("joint name: ",[joint_infos[i][1] for i in available_joints_indexes])
-    # print("can use joint: ",[joint_infos[i][2] for i in available_joints_indexes])
-
-    # info[3] : JOINT_REVOLUTE, JOINT_PRISMATIC, JOINT_SPHERICAL, JOINT_PLANAR, JOINT_FIXED
-    # a = [i[3] for i in joint_infos]
-    joint_states = [j for j, i in zip(joint_states, joint_infos) if i[3] > -1]
-    # joint_states = [j for j, i in zip(joint_states, joint_infos)]
-    joint_positions = [state[0] for state in joint_states]
-    joint_velocities = [state[1] for state in joint_states]
-    joint_torques = [state[3] for state in joint_states]
-    return joint_positions, joint_velocities, joint_torques
-
 # p.resetSimulation()
 # robot_id = SetSimulation()
 # numJoints = p.getNumJoints(robot_id[0])
@@ -206,7 +169,7 @@ print("RobotEndEffectorIndex:",RobotEndEffectorIndex)
 robotEndOrientation = p.getQuaternionFromEuler([0,0,-1.57])
 # targetPositionsJoints=[0,-1.57/2,1.57/2,0,-1.57,0,0,0,0,0,0,0,0,1.57]
 # targetPositionsJoints=[0,-1.57/2,1.57/2,-0.5,-1.57,0,0,0,0,0,0]
-# setJointPosition(robot_id, targetPositionsJoints, 11)
+# robot_control.setJointPosition(robot_id, targetPositionsJoints, 11)
 # for i in range(240):
 #     p.stepSimulation()
 #     sleep(1./240.)
@@ -229,7 +192,7 @@ p.removeAllUserDebugItems()
 # %%
 joint_index = 4
 targetPosition_init = [0, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
-setJointPosition(robot_id, targetPosition_init, 11)
+robot_control.setJointPosition(robot_id, targetPosition_init, 11)
 sleep(1.)
 result = p.getLinkState(robot_id,
                         RobotEndEffectorIndex,
@@ -287,7 +250,7 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.14,0.25,0.25],\
 # %%
 # targetPosition_init = [3, 0.3, 3, 5.5, 1.6, 0.5, 0, 3, 3, 3, 3]
 targetPosition_init = [0, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
-setJointPosition(robot_id, targetPosition_init, 11)
+robot_control.setJointPosition(robot_id, targetPosition_init, 11)
 sleep(2.)
 p.removeAllUserDebugItems()
 
@@ -322,8 +285,8 @@ for j in range(6):
         move_step = -0.0005
     for i in range(1*240):
         step_flag = step_flag + 1
-        pos, vel, torq = getJointStates(robot_id)
-        mpos, mvel, mtorq = getMotorJointStates(robot_id)
+        pos, vel, torq = robot_control.getJointStates(robot_id)
+        mpos, mvel, mtorq = robot_control.getMotorJointStates(robot_id)
     
         #获取机器人手臂运动过程中的节点位置
         result = p.getLinkState(robot_id,
@@ -372,8 +335,8 @@ for j in range(6):
                 print('err******', i, joint_ik[i])
             
     	#机器人手臂的移动
-        # setJointPosition(robot_id, targetPositionsJoints[0:11], 11)
-        setJointPosition(robot_id, joint_ik, 11)
+        # robot_control.setJointPosition(robot_id, targetPositionsJoints[0:11], 11)
+        robot_control.setJointPosition(robot_id, joint_ik, 11)
         # location, _ = p.getBasePositionAndOrientation(robot_id[0])
         # p.resetDebugVisualizerCamera(
         #     cameraDistance=3,
@@ -422,7 +385,7 @@ p.disconnect(physicsClientId)
 
 # # %%
 # targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-# setJointPosition(robot_id, targetPosition_init, 11)
+# robot_control.setJointPosition(robot_id, targetPosition_init, 11)
 
 
 

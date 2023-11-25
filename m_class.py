@@ -279,9 +279,6 @@ class ParameterInit :
         link_7_visual = elements_link[7].findall('visual')
         link_7_origin = link_7_visual[0].findall('origin')
         link_7_origin[0].set('rpy',  '1.57, 0, 3.14159')
-        
-        # joint_origin = elements[4].findall('origin')
-        # joint_origin[0].set('xyz', '-2, 0, 0.5')
 
         joint_lower = [0] * numJoints
         joint_upper = [0] * numJoints
@@ -300,7 +297,10 @@ class ParameterInit :
         for i in range(numJoints):
             joint_pos[i] = joint_origin_list[i][0].get('xyz')
             joint_orn[i] = joint_origin_list[i][0].get('rpy')
+        print('*'*20)
         # pprint(joint_xyz)
+        pprint(joint_pos)
+        pprint(joint_orn)
         # pprint(joint_lower)
         # pprint(joint_upper)
         # pprint(joint_effort)
@@ -310,24 +310,24 @@ class ParameterInit :
         joint_origin_list[1][0].set('xyz',  '0.00000 0.00000 0.00000')
         joint_origin_list[2][0].set('xyz',  '0.00000 -0.36330 0.00000')
         joint_origin_list[3][0].set('xyz',  '0.04951 0.00000 0.00000')
-        joint_origin_list[4][0].set('xyz',  '-0.04951 0.36665 0.00000')
+        joint_origin_list[4][0].set('xyz',  '-0.04951 -0.36665 0.00000')
         joint_origin_list[5][0].set('xyz',  '0.00000 0.00000 0.00000')
         joint_origin_list[6][0].set('xyz',  '0.00000 0.00000 0.00000')
-        joint_origin_list[7][0].set('xyz',  '0.04050 0.00000 0.55443')
+        joint_origin_list[7][0].set('xyz',  '0.04050 0.00000 -0.55443')
         joint_origin_list[8][0].set('xyz',   '0.00000 0.00000 0.00000')
         joint_origin_list[9][0].set('xyz',   '0.01125 0.00000 0.00000')
         joint_origin_list[10][0].set('xyz' , '0.01125 0.00000 0.00000')
 
         joint_origin_list[0][0].set('rpy',  '0.00000 0.00000 0.00000')
         joint_origin_list[1][0].set('rpy', '-1.57079 0.00000 0.00000')
-        joint_origin_list[2][0].set('rpy', '-1.57079 0.00000 3.14159')
-        joint_origin_list[3][0].set('rpy',  '1.57079 0.00000 0.00000')
-        joint_origin_list[4][0].set('rpy', '-1.57079 0.00000 0.00000')
-        joint_origin_list[5][0].set('rpy', '-1.57079 0.00000 3.14159')
-        joint_origin_list[6][0].set('rpy', '-1.57079 0.00000 3.14159')
-        joint_origin_list[7][0].set('rpy', '0.00000 0.00000 -1.57079')
-        joint_origin_list[8][0].set('rpy', '-1.57079 0 0')
-        joint_origin_list[9][0].set('rpy', '0.00000 0.00000 0.00000')
+        joint_origin_list[2][0].set('rpy', '1.57079 0.00000 3.14159')
+        joint_origin_list[3][0].set('rpy',  '-1.57079 0.00000 3.14159')
+        joint_origin_list[4][0].set('rpy', '-1.57079 0.00000 3.14159')
+        joint_origin_list[5][0].set('rpy', '1.57079 -1.57079 0.00000')
+        joint_origin_list[6][0].set('rpy', '0.00000 0.00000 0.00000')
+        joint_origin_list[7][0].set('rpy', '-1.57079 0.00000 0.00000')
+        joint_origin_list[8][0].set('rpy', '-1.57079 0.00000 -1.57079')
+        joint_origin_list[9][0].set('rpy', '-1.57079 0.00000 3.14159')
         joint_origin_list[10][0].set('rpy', '0.00000 0.00000 0.00000')
         # joint_axis[0][0].set('xyz', '')
         # joint_axis[1][0].set('xyz', '')
@@ -449,15 +449,18 @@ class DHParameter :
         pprint(joint_orn_float_np)
         return joint_pos_float_np, joint_orn_float_np
 
-    def DH_compute(self):
+    def DH_compute(self, joint_positions, end_pos=[0,0,0]):
+        base_pos = np.array(end_pos+[1])
+        numJoints = 11
         pos, orn = self.getPosOrn()
         Td = np.zeros((numJoints, 4, 4))
         Tx = np.zeros((numJoints, 4, 4))
         Ty = np.zeros((numJoints, 4, 4))
         Tz = np.zeros((numJoints, 4, 4))
-        base_pos = np.array([0, 0, 0, 1])
-        joint_pos = np.zeros((numJoints, 4, 4))
-        joint_orn = np.zeros((numJoints, 4, 4))
+        T_dot = np.eye(4)
+        T_joint = np.array([0., 0., 0.,1.]*(numJoints+1))
+        T_joint.resize(12,4)
+        point_joint = np.zeros((numJoints+1, 3))
         orn_cos_x = np.zeros(numJoints)
         orn_sin_x = np.zeros(numJoints)
         orn_cos_y = np.zeros(numJoints)
@@ -469,12 +472,28 @@ class DHParameter :
             orn_sin_x[i] = np.sin(orn[i][0])
             orn_cos_y[i] = np.cos(orn[i][1])
             orn_sin_y[i] = np.sin(orn[i][1])
-            orn_cos_z[i] = np.cos(orn[i][2])
-            orn_sin_z[i] = np.sin(orn[i][2])
+            orn_cos_z[i] = np.cos(orn[i][2]+joint_positions[i])
+            orn_sin_z[i] = np.sin(orn[i][2]+joint_positions[i])
+            # Ta[i] = np.array([[1, 0, 0, pos[i][0]],
+            #                   [0, 1, 0, 0        ],
+            #                   [0, 0, 1, 0        ],
+            #                   [0, 0, 0, 1        ]])
+            # Td[i] = np.array([[1, 0, 0, 0        ],
+            #                   [0, 1, 0, 0        ],
+            #                   [0, 0, 1, pos[i][2]],
+            #                   [0, 0, 0, 1        ]])
             Td[i] = np.array([[1, 0, 0, pos[i][0]],
                               [0, 1, 0, pos[i][1]],
                               [0, 0, 1, pos[i][2]],
                               [0, 0, 0, 1        ]])
+            # Talpha = np.array([[1, 0,            0,               0],
+            #                   [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
+            #                   [0, orn_sin_x[i], orn_cos_x[i],    0],
+            #                   [0, 0,            0,               1]])
+            # Tzeta = np.array([[1, 0,            0,               0],
+            #                   [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
+            #                   [0, orn_sin_x[i], orn_cos_x[i],    0],
+            #                   [0, 0,            0,               1]])
             Tx[i] = np.array([[1, 0,            0,               0],
                               [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
                               [0, orn_sin_x[i], orn_cos_x[i],    0],
@@ -487,29 +506,53 @@ class DHParameter :
                               [orn_sin_z[i], orn_cos_z[i],    0, 0],
                               [0,            0,               1, 0],
                               [0,            0,               0, 1]])
-            joint_pos[i] = base_pos@Tx[i]@Td[i]@Tz[i]
-            joint_orn[i] = base_pos@Tx[i]@Td[i]@Tz[i]
+            
+            T_dot = T_dot@Td[i]@Tx[i]@Tz[i]
+            T_joint[i+1] = T_dot@base_pos
+            point_joint[i+1] = T_joint[i+1][0:3]
+            p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=2)
+        p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
+        return point_joint[numJoints]
 
+class robot_control :
+    
+    def setJointPosition(robot, position, ctl_num):
+        num_joints = p.getNumJoints(robot)
+        p.setJointMotorControlArray(robot,
+                                    range(ctl_num),
+                                    p.POSITION_CONTROL,
+                                    targetPositions=position)
+        # if len(position) == num_joints: 
+        #     p.setJointMotorControlArray(robot,
+        #                                 range(num_joints),
+        #                                 p.POSITION_CONTROL,
+        #                                 targetPositions=position)
+        # else:
+        #     print("num_joints is not right")
+    def getJointStates(robot):
+        joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
+        joint_positions = [state[0] for state in joint_states]
+        joint_velocities = [state[1] for state in joint_states]
+        joint_torques = [state[3] for state in joint_states]
+        return joint_positions, joint_velocities, joint_torques
 
+    def getMotorJointStates(robot):
+        joint_states = p.getJointStates(robot, range(p.getNumJoints(robot)))
+        joint_infos = [p.getJointInfo(robot, i) for i in range(p.getNumJoints(robot))]
+        
+        # 可以使用的关节
+        available_joints_indexes = [i for i in range(p.getNumJoints(robot)) if joint_infos[2] != p.JOINT_FIXED]
+        # print("joint name: ",[joint_infos[i][1] for i in available_joints_indexes])
+        # print("can use joint: ",[joint_infos[i][2] for i in available_joints_indexes])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # info[3] : JOINT_REVOLUTE, JOINT_PRISMATIC, JOINT_SPHERICAL, JOINT_PLANAR, JOINT_FIXED
+        # a = [i[3] for i in joint_infos]
+        joint_states = [j for j, i in zip(joint_states, joint_infos) if i[3] > -1]
+        # joint_states = [j for j, i in zip(joint_states, joint_infos)]
+        joint_positions = [state[0] for state in joint_states]
+        joint_velocities = [state[1] for state in joint_states]
+        joint_torques = [state[3] for state in joint_states]
+        return joint_positions, joint_velocities, joint_torques
 class CameraOperate :
     
     def __init__(self, robot_id : int, width : int = 224, height : int = 224, physicsClientId : int = 0):
