@@ -37,7 +37,11 @@ joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(
 point_joint_base = DHParameter().DH_compute(targetPosition_init, [0,0,0])
 
 for i in range(240 * 10):
+<<<<<<< HEAD
     targetPosition_init[0] = 1 * np.sin(2 * np.pi * 0.5 * i / 240)
+=======
+    targetPosition_init[0] = 1 * np.sin(2 * np.pi * 0.2 * i / 240)
+>>>>>>> 22f746db022153c9087f6bbb4d5aea3096576cf3
     if targetPosition_init[0] > 1 :
         print('******')
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
