@@ -20,19 +20,30 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF("plane.urdf", useMaximalCoordinates=False)
-robot_id = p.loadURDF("./ccc/000PSM_10.SLDASM/urdf/modified.urdf",
+robot_id = p.loadURDF("./ddd/000PSM_10.SLDASM/urdf/modified.urdf",
                       basePosition=[0, 0, 0], useMaximalCoordinates=False, useFixedBase=True)
-
-numJoints = 11
+# robot_id = p.loadURDF("./ccc/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+#                       basePosition=[0, 0, 0], useMaximalCoordinates=False, useFixedBase=True)
 
 # %%
-targetPosition_init = [0.3, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
-robot_control.setJointPosition(robot_id, targetPosition_init, 11)
+numJoints = 11
+
+targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0.5, -0.5, 0]
+targetPosition_init = [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.1, 0.5, 0.5, 0.5, 0.5]
+# targetPosition_init = [1.57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
 sleep(1.)
 joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
-point_joint_base = DHParameter().DH_compute(joint_positions, [1,0,0])
+point_joint_base = DHParameter().DH_compute(targetPosition_init, [0,0,0])
 
-
+for i in range(240 * 10):
+    targetPosition_init[0] = 1 * np.sin(2 * np.pi * 0.2 * i / 240)
+    if targetPosition_init[0] > 1 :
+        print('******')
+    p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
+    sleep(1./24.)
+    joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
+    point_joint_base = DHParameter().DH_compute(targetPosition_init, [0,0,0])
 
 
 

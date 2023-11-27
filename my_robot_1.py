@@ -71,14 +71,12 @@ p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
 
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF("plane.urdf", useMaximalCoordinates=False)
-robot_id = p.loadURDF("./ccc/000PSM_10.SLDASM/urdf/modified.urdf",
+robot_id = p.loadURDF("./ddd/000PSM_10.SLDASM/urdf/modified.urdf",
                       basePosition=[0, 0, 0], useMaximalCoordinates=False, useFixedBase=True)
 
 targetPosition_init = [0, -0, 0, -0, 0, 0, 0, 0, 0, 0, 0]
-p.setJointMotorControlArray(robot_id,
-                            range(11),
-                            p.POSITION_CONTROL,
-                            targetPositions=targetPosition_init)
+targetPosition_init = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
 set_robot = SetSimulation(robot_id)
 set_robot.Set_init_my_robot()
 # Pos, Orn = p.getBasePositionAndOrientation(robot_id) # 返回两个列表，第一个：base连杆的位置，第二个：base的姿态四元数

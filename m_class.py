@@ -233,7 +233,7 @@ class Robot_info :
                 
     def getInertial(self, joint_id):
         """ get inertial data. """
-        xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml")
+        xmlDoc = xml.dom.minidom.parse("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.xml")
 
         mass = xmlDoc.getElementsByTagName("mass")[joint_id].getAttribute("value")
         ixx  = xmlDoc.getElementsByTagName("inertia")[joint_id].getAttribute("ixx")
@@ -258,27 +258,40 @@ class Robot_info :
 class ParameterInit :
     
     def pos_lim():
-        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
-                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf")
+        shutil.copyfile("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/000PSM_10.SLDASM.urdf",
+                        "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.urdf")
 
-        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf"):
-            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.urdf",
-                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml")
+        if os.path.exists("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.urdf"):
+            os.replace("/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.urdf",
+                       "/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.xml")
 
-        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.xml')
         numJoints = 11
         root = tree.getroot()
         elements_joint = root.findall('joint')
         elements_link = root.findall('link')
         joint_limit = [elements_joint[i].findall('limit') for i in range(numJoints)]
+        joint_parent = [elements_joint[i].findall('parent') for i in range(numJoints)]
         joint_axis = [elements_joint[i].findall('axis') for i in range(numJoints)]
         joint_origin_list = [elements_joint[i].findall('origin') for i in range(11)]
-        link_2_visual = elements_link[2].findall('visual')
-        link_2_origin = link_2_visual[0].findall('origin')
-        link_2_origin[0].set('rpy',  '0, 0, -0.13')
-        link_7_visual = elements_link[7].findall('visual')
-        link_7_origin = link_7_visual[0].findall('origin')
-        link_7_origin[0].set('rpy',  '1.57, 0, 3.14159')
+        # link_2_visual = elements_link[2].findall('visual')
+        # link_2_origin = link_2_visual[0].findall('origin')
+        # link_2_origin[0].set('rpy',  '0, 0, -0.13')
+        # link_3_visual = elements_link[3].findall('visual')
+        # link_3_origin = link_3_visual[0].findall('origin')
+        # link_3_origin[0].set('rpy',  '0, 3.14, 3.14')
+        # link_4_inertial = elements_link[4].findall('inertial')
+        # link_4_inertial_origin = link_4_inertial[0].findall('origin')
+        # link_4_inertial_origin[0].set('xyz',  '0, 0, 0')
+        # link_5_visual = elements_link[5].findall('visual')
+        # link_5_inertial = elements_link[5].findall('inertial')
+        # link_5_origin = link_5_visual[0].findall('origin')
+        # link_5_inertial_origin = link_5_inertial[0].findall('origin')
+        # link_5_origin[0].set('rpy',  '0, 3.14, 0')
+        # link_5_inertial_origin[0].set('xyz',  '0, 0, 0')
+        # link_7_visual = elements_link[7].findall('visual')
+        # link_7_origin = link_7_visual[0].findall('origin')
+        # link_7_origin[0].set('rpy',  '0 0 1.57')
 
         joint_lower = [0] * numJoints
         joint_upper = [0] * numJoints
@@ -306,40 +319,43 @@ class ParameterInit :
         # pprint(joint_effort)
         # pprint(joint_velocity)
 
-        joint_origin_list[0][0].set('xyz',  '0.00000 0.00000 0.27985')
-        joint_origin_list[1][0].set('xyz',  '0.00000 0.00000 0.00000')
-        joint_origin_list[2][0].set('xyz',  '0.00000 -0.36330 0.00000')
-        joint_origin_list[3][0].set('xyz',  '0.04951 0.00000 0.00000')
-        joint_origin_list[4][0].set('xyz',  '-0.04951 -0.36665 0.00000')
-        joint_origin_list[5][0].set('xyz',  '0.00000 0.00000 0.00000')
-        joint_origin_list[6][0].set('xyz',  '0.00000 0.00000 0.00000')
-        joint_origin_list[7][0].set('xyz',  '0.04050 0.00000 -0.55443')
-        joint_origin_list[8][0].set('xyz',   '0.00000 0.00000 0.00000')
-        joint_origin_list[9][0].set('xyz',   '0.01125 0.00000 0.00000')
-        joint_origin_list[10][0].set('xyz' , '0.01125 0.00000 0.00000')
+        # joint_origin_list[0][0].set('xyz', '0.00000 0.00000 0.27985')
+        # joint_origin_list[1][0].set('xyz', '0.00000 0.00000 0.00000')
+        joint_origin_list[2][0].set('xyz', '0.00000 -0.36330 0.00000')
+        joint_origin_list[3][0].set('xyz', '0.04951 0.00000 0.00000')
+        joint_origin_list[4][0].set('xyz', '0.04951 0.36665 0.00000')
+        # joint_origin_list[5][0].set('xyz', '0.00000 0.00000 0.00000')
+        # joint_origin_list[6][0].set('xyz', '0.00000 0.00000 0.00000')
+        # joint_origin_list[7][0].set('xyz', '-0.04050 0.00000 0.55443')
+        # joint_origin_list[8][0].set('xyz', '0.00000 0.00000 0.00000')
+        joint_origin_list[9][0].set('xyz', '0.01125 0.00000 0.00000')
+        joint_origin_list[10][0].set('xyz','0.01125 0.00000 0.00000')
 
-        joint_origin_list[0][0].set('rpy',  '0.00000 0.00000 0.00000')
-        joint_origin_list[1][0].set('rpy', '-1.57079 0.00000 0.00000')
-        joint_origin_list[2][0].set('rpy', '1.57079 0.00000 3.14159')
-        joint_origin_list[3][0].set('rpy',  '-1.57079 0.00000 3.14159')
-        joint_origin_list[4][0].set('rpy', '-1.57079 0.00000 3.14159')
-        joint_origin_list[5][0].set('rpy', '1.57079 -1.57079 0.00000')
-        joint_origin_list[6][0].set('rpy', '0.00000 0.00000 0.00000')
-        joint_origin_list[7][0].set('rpy', '-1.57079 0.00000 0.00000')
-        joint_origin_list[8][0].set('rpy', '-1.57079 0.00000 -1.57079')
-        joint_origin_list[9][0].set('rpy', '-1.57079 0.00000 3.14159')
-        joint_origin_list[10][0].set('rpy', '0.00000 0.00000 0.00000')
-        # joint_axis[0][0].set('xyz', '')
-        # joint_axis[1][0].set('xyz', '')
-        # joint_axis[2][0].set('xyz', '')
-        # joint_axis[3][0].set('xyz', '')
-        # joint_axis[4][0].set('xyz', '')
-        # joint_axis[5][0].set('xyz', '')
-        # joint_axis[6][0].set('xyz', '')
-        # joint_axis[7][0].set('xyz', '')
-        # joint_axis[8][0].set('xyz', '')
-        # joint_axis[9][0].set('xyz', '')
-        # joint_axis[10][0].set('xyz', '')
+        # joint_origin_list[0][0].set('rpy', '0.00000 0.00000 0.00000')
+        # joint_origin_list[1][0].set('rpy', '-1.57078 0.00000 0.00000')
+        joint_origin_list[2][0].set('rpy', '-1.57079 0.00000 -3.14159')
+        joint_origin_list[3][0].set('rpy', '1.57079 0.00000 3.14159')
+        joint_origin_list[4][0].set('rpy', '1.57078 0.00000 -3.14159')
+        # joint_origin_list[5][0].set('rpy', '-3.1416 1.5708 1.5708')
+        # joint_origin_list[6][0].set('rpy', '-1.5708 0.00000 0.00000')
+        # joint_origin_list[7][0].set('rpy', '0.00000 0.00000 0.00000')
+        # joint_origin_list[8][0].set('rpy', '1.5706 -1.5708 0.00000')
+        joint_origin_list[9][0].set('rpy', '1.5708 3.14159 0.00000')
+        joint_origin_list[10][0].set('rpy','1.5708 3.14159 0.00000')
+
+        joint_parent[9][0].set('link', 'Link9')
+        joint_parent[10][0].set('link', 'Link9')
+        joint_axis[0][0].set('xyz', '0 0 1')
+        joint_axis[1][0].set('xyz', '0 0 1')
+        joint_axis[2][0].set('xyz', '0 0 -1')
+        joint_axis[3][0].set('xyz', '0 0 1')
+        joint_axis[4][0].set('xyz', '0 0 -1')
+        joint_axis[5][0].set('xyz', '0 0 -1')
+        joint_axis[6][0].set('xyz', '0 0 1')
+        joint_axis[7][0].set('xyz', '0 0 1')
+        joint_axis[8][0].set('xyz', '0 0 -1')
+        joint_axis[9][0].set('xyz', '0 0 1')
+        joint_axis[10][0].set('xyz', '0 0 1')
         joint_limit[0][0].set('lower', '-3.14')
         joint_limit[1][0].set('lower', '-3.14')
         joint_limit[2][0].set('lower', '-3.14')
@@ -385,8 +401,8 @@ class ParameterInit :
         joint_limit[9][0].set('velocity', '100')
         joint_limit[10][0].set('velocity', '100')
 
-        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/modified.urdf')
-        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/modified.urdf')
+        tree.write('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.xml')
 
 class DHParameter :
     
@@ -394,7 +410,7 @@ class DHParameter :
     #     self.getPosOrn = getPosOrn
     
     def getPosOrn(self):
-        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ccc/000PSM_10.SLDASM/urdf/test.xml')
+        tree = ET.parse('/home/lihui.liu/anaconda3/envs/anaconda_robot/lib/python3.9/site-packages/pybullet_data/ddd/000PSM_10.SLDASM/urdf/test.xml')
         root = tree.getroot()
         elements = root.findall('joint')
         joint_origin_list = [elements[i].findall('origin') for i in range(11)]
@@ -449,10 +465,34 @@ class DHParameter :
         pprint(joint_orn_float_np)
         return joint_pos_float_np, joint_orn_float_np
 
-    def DH_compute(self, joint_positions, end_pos=[0,0,0]):
+    def DH_compute(self, joint_positions=[0]*11, end_pos=[0,0,0]):
         base_pos = np.array(end_pos+[1])
         numJoints = 11
-        pos, orn = self.getPosOrn()
+        # pos, orn = self.getPosOrn()
+        pos = [[0.00000, 0.00000, 0.27985],
+               [0.00000, 0.00000, 0.00000],
+               [0.00000, -0.36330, 0.00000],
+               [0.04951, 0.00000, 0.00000],
+               [0.04951, 0.36665, 0.00000],
+               [0.00000, 0.00000, 0.00000],
+               [0.00000, 0.00000, 0.00000],
+               [0.04050, 0.00000, 0.55443],
+               [0.00000, 0.00000, 0.00000],
+               [0.00000, 0.01125, 0.00000],
+               [0.00000, 0.00000, 0.00000]]
+
+        orn = [[0.00000, 0.00000, 0.00000],
+               [-1.57078, 0.00000, 0.00000],
+               [-1.57079, 0.00000, -3.14159],
+               [1.57079, 0.00000, 3.14159],
+               [1.57078, 0.00000, 1.57078],
+               [-3.1416, 1.5708, 3.14159],
+               [-1.5708, 0.00000, 0.00000],
+               [0.00000, 0.00000, 0.00000],
+               [1.5706, 0.00000, 0.00000],
+               [1.57080, 3.14159, 0.00000],
+               [1.57080, 3.14159, 0.00000]]
+
         Td = np.zeros((numJoints, 4, 4))
         Tx = np.zeros((numJoints, 4, 4))
         Ty = np.zeros((numJoints, 4, 4))
@@ -472,20 +512,28 @@ class DHParameter :
             orn_sin_x[i] = np.sin(orn[i][0])
             orn_cos_y[i] = np.cos(orn[i][1])
             orn_sin_y[i] = np.sin(orn[i][1])
-            orn_cos_z[i] = np.cos(orn[i][2]+joint_positions[i])
-            orn_sin_z[i] = np.sin(orn[i][2]+joint_positions[i])
-            # Ta[i] = np.array([[1, 0, 0, pos[i][0]],
-            #                   [0, 1, 0, 0        ],
-            #                   [0, 0, 1, 0        ],
-            #                   [0, 0, 0, 1        ]])
-            # Td[i] = np.array([[1, 0, 0, 0        ],
-            #                   [0, 1, 0, 0        ],
-            #                   [0, 0, 1, pos[i][2]],
-            #                   [0, 0, 0, 1        ]])
-            Td[i] = np.array([[1, 0, 0, pos[i][0]],
-                              [0, 1, 0, pos[i][1]],
-                              [0, 0, 1, pos[i][2]],
-                              [0, 0, 0, 1        ]])
+            if i == 6:
+                orn_cos_z[i] = np.cos(orn[i][1])
+                orn_sin_z[i] = np.sin(orn[i][1])
+                Td[i] = np.array([[1, 0, 0, pos[i][0]],
+                                  [0, 1, 0, pos[i][1] + joint_positions[i]],
+                                  [0, 0, 1, pos[i][2]],
+                                  [0, 0, 0, 1        ]])
+            else:
+                orn_cos_z[i] = np.cos(orn[i][2]+joint_positions[i])
+                orn_sin_z[i] = np.sin(orn[i][2]+joint_positions[i])
+                # Ta[i] = np.array([[1, 0, 0, pos[i][0]],
+                #                   [0, 1, 0, 0        ],
+                #                   [0, 0, 1, 0        ],
+                #                   [0, 0, 0, 1        ]])
+                # Td[i] = np.array([[1, 0, 0, 0        ],
+                #                   [0, 1, 0, 0        ],
+                #                   [0, 0, 1, pos[i][2]],
+                #                   [0, 0, 0, 1        ]])
+                Td[i] = np.array([[1, 0, 0, pos[i][0]],
+                                  [0, 1, 0, pos[i][1]],
+                                  [0, 0, 1, pos[i][2]],
+                                  [0, 0, 0, 1        ]])
             # Talpha = np.array([[1, 0,            0,               0],
             #                   [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
             #                   [0, orn_sin_x[i], orn_cos_x[i],    0],
@@ -507,11 +555,12 @@ class DHParameter :
                               [0,            0,               1, 0],
                               [0,            0,               0, 1]])
             
-            T_dot = T_dot@Td[i]@Tx[i]@Tz[i]
+            T_dot = T_dot@Td[i]@Tx[i]@Ty[i]@Tz[i]
             T_joint[i+1] = T_dot@base_pos
             point_joint[i+1] = T_joint[i+1][0:3]
-            p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=2)
-        p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
+            p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
+        # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
+        # p.addUserDebugPoints(pointPositions=point_joint, pointColorsRGB=[[1,0,1]]*12, pointSize=6)
         return point_joint[numJoints]
 
 class robot_control :
@@ -667,6 +716,29 @@ def main():
     # 这里是为了演示，实际开发时，主进程有事件循环，耗时函数不需要调用join()方法
     thread.join()
     print("end")
+
+    # numJoints = 11
+    # joint_positions = [0]*11
+    # T_dot = np.eye(4)
+    # T_joint = np.array([0., 0., 0.,1.]*(numJoints+1))
+    # T_joint.resize(12,4)
+    # for num in range(240*2):
+    #     T_dot = np.eye(4)
+    #     for i in range(numJoints):
+    #         joint_positions[10] = 8 * np.sin(2 * np.pi * 1 * num / 240)
+    #         # joint_positions[0] = math.pi/3
+    #         orn_cos_z[i] = np.cos(orn[i][2]+joint_positions[i])
+    #         orn_sin_z[i] = np.sin(orn[i][2]+joint_positions[i])
+    #         Tz[i] = np.array([[orn_cos_z[i], orn_sin_z[i]*-1, 0, 0],
+    #                           [orn_sin_z[i], orn_cos_z[i],    0, 0],
+    #                           [0,            0,               1, 0],
+    #                           [0,            0,               0, 1]])
+    #         T_dot = T_dot@Td[i]@Tx[i]@Tz[i]
+    #         T_joint[i+1] = T_dot@base_pos
+    #         point_joint[i+1] = T_joint[i+1][0:3]
+    #         # p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=2)
+    #     p.addUserDebugPoints(pointPositions=[point_joint[i+1]], pointColorsRGB=[[1,0,1]], pointSize=6)
+    #     sleep(1./240.)
 
 if __name__ == '__main__':
     main()
