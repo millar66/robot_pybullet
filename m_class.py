@@ -340,20 +340,19 @@ class ParameterInit :
         # joint_origin_list[6][0].set('rpy', '-1.5708 0.00000 0.00000')
         # joint_origin_list[7][0].set('rpy', '0.00000 0.00000 0.00000')
         # joint_origin_list[8][0].set('rpy', '1.5706 -1.5708 0.00000')
-        joint_origin_list[9][0].set('rpy', '1.5708 3.14159 0.00000')
-        joint_origin_list[10][0].set('rpy','1.5708 3.14159 0.00000')
-
+        joint_origin_list[9][0].set('rpy', '-1.57080 0.00000 3.14159')
+        joint_origin_list[10][0].set('rpy','-1.57080 0.00000 3.14159')
         joint_parent[9][0].set('link', 'Link9')
         joint_parent[10][0].set('link', 'Link9')
         joint_axis[0][0].set('xyz', '0 0 1')
         joint_axis[1][0].set('xyz', '0 0 1')
-        joint_axis[2][0].set('xyz', '0 0 -1')
+        joint_axis[2][0].set('xyz', '0 0 1')
         joint_axis[3][0].set('xyz', '0 0 1')
-        joint_axis[4][0].set('xyz', '0 0 -1')
-        joint_axis[5][0].set('xyz', '0 0 -1')
+        joint_axis[4][0].set('xyz', '0 0 1')
+        joint_axis[5][0].set('xyz', '0 0 1')
         joint_axis[6][0].set('xyz', '0 0 1')
         joint_axis[7][0].set('xyz', '0 0 1')
-        joint_axis[8][0].set('xyz', '0 0 -1')
+        joint_axis[8][0].set('xyz', '0 0 1')
         joint_axis[9][0].set('xyz', '0 0 1')
         joint_axis[10][0].set('xyz', '0 0 1')
         joint_limit[0][0].set('lower', '-3.14')
@@ -465,10 +464,33 @@ class DHParameter :
         pprint(joint_orn_float_np)
         return joint_pos_float_np, joint_orn_float_np
 
-    def DH_compute(self, joint_positions=[0]*11, end_pos=[0,0,0]):
-        base_pos = np.array(end_pos+[1])
+    def DH_compute(self, joint_positions=[0]*11, joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3)), end_pos=np.zeros((1,3))):
+        base_pos = np.append(end_pos,1)
         numJoints = 11
         # pos, orn = self.getPosOrn()
+        # pos = [[0.00000, 0.00000, 0.27985],
+        #        [0.00000, 0.00000, 0.00000],
+        #        [0.00000, -0.36330, 0.00000],
+        #        [0.04951, 0.00000, 0.00000],
+        #        [0.04951, 0.36665, 0.00000],
+        #        [0.00000, 0.00000, 0.00000],
+        #        [0.00000, 0.00000, 0.00000],
+        #        [0.04050, 0.00000, 0.55443-0.16],
+        #        [0.00000, 0.00000, 0.16],
+        #        [0.00000, 0.01125, 0.00000],
+        #        [0.00000, 0.00000, 0.00000]]
+
+        # orn = [[0.00000, 0.00000, 0.00000],
+        #        [-1.57078, 0.00000, 0.00000],
+        #        [-1.57079, 0.00000, -3.14159],
+        #        [1.57079, 0.00000, 3.14159],
+        #        [1.57078, 0.00000, 1.57078],
+        #        [-3.1416, 1.5708, 3.14159],
+        #        [-1.5708, 0.00000, 0.00000],
+        #        [0.00000, 0.00000, 0.00000],
+        #        [1.5706, 0.00000, 0.00000],
+        #        [1.57080, 3.14159, 0.00000],
+        #        [1.57080, 3.14159, 0.00000]]
         pos = [[0.00000, 0.00000, 0.27985],
                [0.00000, 0.00000, 0.00000],
                [0.00000, -0.36330, 0.00000],
@@ -476,22 +498,22 @@ class DHParameter :
                [0.04951, 0.36665, 0.00000],
                [0.00000, 0.00000, 0.00000],
                [0.00000, 0.00000, 0.00000],
-               [0.04050, 0.00000, 0.55443],
-               [0.00000, 0.00000, 0.00000],
-               [0.00000, 0.01125, 0.00000],
+               [-0.04050, 0.00000, 0.55443-0.16],
+               [0.00000, 0.00000, 0.16],
+               [-0.01125, 0.00000, 0.00000],
                [0.00000, 0.00000, 0.00000]]
 
         orn = [[0.00000, 0.00000, 0.00000],
                [-1.57078, 0.00000, 0.00000],
-               [-1.57079, 0.00000, -3.14159],
                [1.57079, 0.00000, 3.14159],
-               [1.57078, 0.00000, 1.57078],
-               [-3.1416, 1.5708, 3.14159],
+               [-1.57079, 0.00000, 3.14159],
+               [-1.57078, 0.00000, 0.00000],
+               [-1.57079, 0.00000, 1.57079],
                [-1.5708, 0.00000, 0.00000],
                [0.00000, 0.00000, 0.00000],
-               [1.5706, 0.00000, 0.00000],
-               [1.57080, 3.14159, 0.00000],
-               [1.57080, 3.14159, 0.00000]]
+               [1.5706, 0.00000, -1.57079],
+               [-1.57080, 0.00000, 3.14159],
+               [0.00000, 0.00000, 0.00000]]
 
         Td = np.zeros((numJoints, 4, 4))
         Tx = np.zeros((numJoints, 4, 4))
@@ -508,20 +530,20 @@ class DHParameter :
         orn_cos_z = np.zeros(numJoints)
         orn_sin_z = np.zeros(numJoints)
         for i in range(numJoints):
-            orn_cos_x[i] = np.cos(orn[i][0])
-            orn_sin_x[i] = np.sin(orn[i][0])
-            orn_cos_y[i] = np.cos(orn[i][1])
-            orn_sin_y[i] = np.sin(orn[i][1])
+            orn_cos_x[i] = np.cos(orn[i][0] + float(joint_orn_err[i][0])/1000)
+            orn_sin_x[i] = np.sin(orn[i][0] + float(joint_orn_err[i][0])/1000)
+            orn_cos_y[i] = np.cos(orn[i][1] + float(joint_orn_err[i][1])/1000)
+            orn_sin_y[i] = np.sin(orn[i][1] + float(joint_orn_err[i][1])/1000)
             if i == 6:
                 orn_cos_z[i] = np.cos(orn[i][1])
                 orn_sin_z[i] = np.sin(orn[i][1])
-                Td[i] = np.array([[1, 0, 0, pos[i][0]],
-                                  [0, 1, 0, pos[i][1] + joint_positions[i]],
-                                  [0, 0, 1, pos[i][2]],
+                Td[i] = np.array([[1, 0, 0, pos[i][0] + joint_pos_err[i][0]/1000],
+                                  [0, 1, 0, pos[i][1] + joint_pos_err[i][1]/1000 + joint_positions[i]],
+                                  [0, 0, 1, pos[i][2] + joint_pos_err[i][2]/1000],
                                   [0, 0, 0, 1        ]])
             else:
-                orn_cos_z[i] = np.cos(orn[i][2]+joint_positions[i])
-                orn_sin_z[i] = np.sin(orn[i][2]+joint_positions[i])
+                orn_cos_z[i] = np.cos(orn[i][2] + joint_orn_err[i][2]/1000 + joint_positions[i])
+                orn_sin_z[i] = np.sin(orn[i][2] + joint_orn_err[i][2]/1000 + joint_positions[i])
                 # Ta[i] = np.array([[1, 0, 0, pos[i][0]],
                 #                   [0, 1, 0, 0        ],
                 #                   [0, 0, 1, 0        ],
@@ -530,9 +552,9 @@ class DHParameter :
                 #                   [0, 1, 0, 0        ],
                 #                   [0, 0, 1, pos[i][2]],
                 #                   [0, 0, 0, 1        ]])
-                Td[i] = np.array([[1, 0, 0, pos[i][0]],
-                                  [0, 1, 0, pos[i][1]],
-                                  [0, 0, 1, pos[i][2]],
+                Td[i] = np.array([[1, 0, 0, pos[i][0] + joint_pos_err[i][0]/1000],
+                                  [0, 1, 0, pos[i][1] + joint_pos_err[i][1]/1000],
+                                  [0, 0, 1, pos[i][2] + joint_pos_err[i][2]/1000],
                                   [0, 0, 0, 1        ]])
             # Talpha = np.array([[1, 0,            0,               0],
             #                   [0, orn_cos_x[i], orn_sin_x[i]*-1, 0],
@@ -561,7 +583,7 @@ class DHParameter :
             p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
         # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
         # p.addUserDebugPoints(pointPositions=point_joint, pointColorsRGB=[[1,0,1]]*12, pointSize=6)
-        return point_joint[numJoints]
+        return point_joint[numJoints]*1000
 
 class robot_control :
     

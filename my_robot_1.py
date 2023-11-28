@@ -112,6 +112,25 @@ p.addUserDebugPoints(pointPositions=[coordinate_pos[0]], pointColorsRGB=[[1,0,0]
 # p.removeConstraint(one_id) # 移除约束
 
 numJoints = p.getNumJoints(robot_id, physicsClientId)
+# %%
+# numJoints = 11
+targetPosition_init = [0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.1, 0.5, 0.5, 0.5, 0.5]
+point_joint_base1 = DHParameter().DH_compute(targetPosition_init)
+
+joint_pos_err = np.zeros((numJoints, 3))
+joint_orn_err = np.zeros((numJoints, 3))
+for i in range(11):
+    joint_pos_err[i] = [0.01, 0.01, 0.01]
+    if i != 0:
+        joint_pos_err[i-1] = [0.0, 0.0, 0.0]
+    point_joint_base2 = DHParameter().DH_compute(targetPosition_init, joint_pos_err, joint_orn_err)
+    print(point_joint_base1,'\n',point_joint_base2,'\n','************ \n','joint',i,'= ',point_joint_base1-point_joint_base2)
+
+
+
+
+
+# %%
 print("连杆信息: ")
 for link_index in range(-1, numJoints, 1):
     info_link = Robot_info(robot_id, link_index)
