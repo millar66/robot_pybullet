@@ -464,10 +464,21 @@ class DHParameter :
         pprint(joint_orn_float_np)
         return joint_pos_float_np, joint_orn_float_np
 
-    def DH_compute(self, joint_positions=[0]*11, joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3)), end_pos=np.zeros((1,3))):
+    def DH_compute(self, joint_positions=[0]*11, end_pos=np.zeros((3)), end_orn=np.zeros((3)), joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3))):
         base_pos = np.append(end_pos,1)
+        base_orn = np.append(end_orn,1)
+        cr = np.cos(end_orn[0]);
+        cp = np.cos(end_orn[1]);
+        cy = np.cos(end_orn[2]);
+        sr = np.sin(end_orn[0]);
+        sp = np.sin(end_orn[1]);
+        sy = np.sin(end_orn[2]);
+        base_pos_orn = np.array([[cp*cy, cy*sr*sp - cr*sy, sr*sy + cr*cy*sp, end_pos[0]],
+                                 [cp*sy, cr*cy + sr*sp*sy, cr*sp*sy - cy*sr, end_pos[1]],
+                                 [-sp,   cp*sr,            cr*cp,            end_pos[2]],
+                                 [0,     0,                0,                1         ]])
         numJoints = 11
-        # pos, orn = self.getPosOrn()
+        # numJoints = 8
         # pos = [[0.00000, 0.00000, 0.27985],
         #        [0.00000, 0.00000, 0.00000],
         #        [0.00000, -0.36330, 0.00000],
@@ -475,53 +486,55 @@ class DHParameter :
         #        [0.04951, 0.36665, 0.00000],
         #        [0.00000, 0.00000, 0.00000],
         #        [0.00000, 0.00000, 0.00000],
-        #        [0.04050, 0.00000, 0.55443-0.16],
+        #        [-0.04050, 0.00000, 0.55443-0.16],
         #        [0.00000, 0.00000, 0.16],
-        #        [0.00000, 0.01125, 0.00000],
+        #        [-0.01125, 0.00000, 0.00000],
         #        [0.00000, 0.00000, 0.00000]]
 
         # orn = [[0.00000, 0.00000, 0.00000],
         #        [-1.57078, 0.00000, 0.00000],
-        #        [-1.57079, 0.00000, -3.14159],
         #        [1.57079, 0.00000, 3.14159],
-        #        [1.57078, 0.00000, 1.57078],
-        #        [-3.1416, 1.5708, 3.14159],
+        #        [-1.57079, 0.00000, 3.14159],
+        #        [-1.57078, 0.00000, 0.00000],
+        #        [-1.57079, 0.00000, 1.57079],
         #        [-1.5708, 0.00000, 0.00000],
         #        [0.00000, 0.00000, 0.00000],
-        #        [1.5706, 0.00000, 0.00000],
-        #        [1.57080, 3.14159, 0.00000],
-        #        [1.57080, 3.14159, 0.00000]]
+        #        [1.5706, 0.00000, -1.57079],
+        #        [-1.57080, 0.00000, 3.14159],
+        #        [0.00000, 0.00000, 0.00000]]
         pos = [[0.00000, 0.00000, 0.27985],
                [0.00000, 0.00000, 0.00000],
                [0.00000, -0.36330, 0.00000],
-               [0.04951, 0.00000, 0.00000],
+               [-0.04951, 0.00000, 0.00000],
                [0.04951, 0.36665, 0.00000],
                [0.00000, 0.00000, 0.00000],
                [0.00000, 0.00000, 0.00000],
                [-0.04050, 0.00000, 0.55443-0.16],
                [0.00000, 0.00000, 0.16],
-               [-0.01125, 0.00000, 0.00000],
+               [0.01125, 0.00000, 0.00000],
                [0.00000, 0.00000, 0.00000]]
 
-        orn = [[0.00000, 0.00000, 0.00000],
+        orn = [[ 0.00000, 0.00000, 0.00000],
                [-1.57078, 0.00000, 0.00000],
-               [1.57079, 0.00000, 3.14159],
-               [-1.57079, 0.00000, 3.14159],
+               [ 1.57079, 0.00000, 0.00000],
+               [ 1.57079, 0.00000, 0.00000],
                [-1.57078, 0.00000, 0.00000],
                [-1.57079, 0.00000, 1.57079],
-               [-1.5708, 0.00000, 0.00000],
-               [0.00000, 0.00000, 0.00000],
-               [1.5706, 0.00000, -1.57079],
-               [-1.57080, 0.00000, 3.14159],
-               [0.00000, 0.00000, 0.00000]]
+               [-1.57080, 0.00000, 0.00000],
+               [ 0.00000, 0.00000, 0.00000],
+               [ 1.57080, 0.00000, 1.57079],
+               [ 1.57080, 0.00000, 0.00000],
+               [ 0.00000, 0.00000, 0.00000]]
 
         Td = np.zeros((numJoints, 4, 4))
         Tx = np.zeros((numJoints, 4, 4))
         Ty = np.zeros((numJoints, 4, 4))
         Tz = np.zeros((numJoints, 4, 4))
         T_dot = np.eye(4)
-        T_joint = np.array([0., 0., 0.,1.]*(numJoints+1))
-        T_joint.resize(12,4)
+        origin_point = np.eye(4, 4)
+        # T_joint = np.array([0., 0., 0.,1.]*(numJoints+1))
+        # T_joint.resize(12,4)
+        T_joint = np.zeros((numJoints+1, 4, 4))
         point_joint = np.zeros((numJoints+1, 3))
         orn_cos_x = np.zeros(numJoints)
         orn_sin_x = np.zeros(numJoints)
@@ -578,8 +591,11 @@ class DHParameter :
                               [0,            0,               0, 1]])
             
             T_dot = T_dot@Td[i]@Tx[i]@Ty[i]@Tz[i]
-            T_joint[i+1] = T_dot@base_pos
-            point_joint[i+1] = T_joint[i+1][0:3]
+            if i < numJoints-1:
+                T_joint[i+1] = T_dot@origin_point
+            else:
+              T_joint[i+1] = T_dot@base_pos_orn
+            point_joint[i+1] = T_joint[i+1][0:3, 3]
             p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
         # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
         # p.addUserDebugPoints(pointPositions=point_joint, pointColorsRGB=[[1,0,1]]*12, pointSize=6)

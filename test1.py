@@ -30,11 +30,14 @@ numJoints = 11
 
 targetPosition_init = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 targetPosition_init = [0, 0.5, -0.5, 0.5, -0.5, -0.5, 0.1, 0.5, 0.5, 0.5, 0.5]
+# targetPosition_init = [0, 0, 0, 0, 0, 0, 0, -1, 0.5, 0, 0]
 # targetPosition_init = [1.57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
 sleep(1.)
 joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
 point_joint_base = DHParameter().DH_compute(targetPosition_init)
+end_point = np.array([0., 0., 0])
+end_orn = np.array([0, 0, 0.])
 
 for i in range(240 * 10):
     targetPosition_init[0] = 1 * np.sin(2 * np.pi * 0.5 * i / 240)
@@ -43,7 +46,7 @@ for i in range(240 * 10):
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
     sleep(1./24.)
     joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
-    point_joint_base = DHParameter().DH_compute(targetPosition_init)
+    point_joint_base = DHParameter().DH_compute(targetPosition_init, end_point, end_orn)
 
 # %%
 numJoints = 11
