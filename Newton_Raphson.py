@@ -31,6 +31,7 @@ print(x)
 import sympy
 import pybullet as p
 from docx import Document
+import pickle
 
 joint_positions=[0]*11
 joint_pos_err=np.zeros((11, 3))
@@ -59,6 +60,7 @@ Tx = np.zeros((numJoints, 4, 4))
 Ty = np.zeros((numJoints, 4, 4))
 Tz = np.zeros((numJoints, 4, 4))
 T_dot = []
+T_simplify = []
 # T_dot = np.zeros((numJoints, 4, 4))
 T_joint = []
 # T_joint.resize(12,4)
@@ -87,6 +89,7 @@ theta9 = sympy.symbols("theta9")
 theta10 = sympy.symbols("theta10")
 theta11 = sympy.symbols("theta11")
 T = []
+
 for i in range(numJoints):
     if i != 6:
         T_NumJoint = sympy.Matrix([
@@ -105,7 +108,8 @@ for i in range(numJoints):
         T_dot.append(T_NumJoint)
     else:
         T_dot.append(T_dot[i-1] * T_NumJoint)
-    T_joint.append(T_dot[i] * base_pos)
+    T_simplify.append(T_dot[i].xreplace({n : round(n, 6) for n in T_dot[i].atoms(sympy.Number)}))
+    T_joint.append(T_simplify[i] * base_pos)
     # np_joint = T_joint[i].subs([(theta1,0),(theta2,0),(theta3,3)])[0:3].T
     
     
@@ -117,11 +121,18 @@ for i in range(numJoints):
                                 ,theta_rol[10])[0:3].T
     p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
 
-file=Document()
-# doc = Document(path)
-file.add_heading("robot_T_1_8:")
-file.add_paragraph(point_joint.all())
-file.save('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet/T.docx')
+
+# with open('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet/expr.pickle', 'wb') as file:
+#     pickle.dump(T_simplify, file)
+# with open('expr.pickle', 'rb') as file:
+#     expr = pickle.load(file)
+
+# print(expr)
+# file=Document()
+# # doc = Document(path)
+# file.add_heading("robot_T_1_8:")
+# file.add_paragraph(point_joint.all())
+# file.save('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet/T.docx')
 # %%
 p.removeAllUserDebugItems()
 
@@ -167,19 +178,22 @@ for i in range(numJoints):
 
 
 
+x = sympy.symbols("x")
+a = sympy.simplify(0.00001*sympy.sin(x)**2 + sympy.cos(x)**3)
+
+b = a.xreplace({n : round(n, 4) for n in a.atoms(sympy.Number)})
 
 
+# T_simplify = []
+T_simplify = T_dot[7].xreplace({n : round(n, 6) for n in T_dot[7].atoms(sympy.Number)})
 
 
+sympy.diff(T_simplify[7][0],theta8)
+args = sympy.Matrix([theta1, theta2, theta3, theta4, theta5, theta6, theta7, theta8])
+a = sympy.Matrix(T_simplify[7][0:4])
+T_simplify[7].jacobian(args)
 
-
-
-
-
-
-
-
-
+a.jacobian(args)
 
 
 

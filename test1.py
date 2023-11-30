@@ -35,7 +35,8 @@ targetPosition_init = [0, 0.5, -0.5, 0.5, -0.5, -0.5, 0.1, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
 sleep(1.)
 joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
-point_joint_base = DHParameter().DH_compute(targetPosition_init)
+point_joint_base, point_joint_orn = DHParameter().DH_compute(targetPosition_init)
+# joint_T = []
 end_point = np.array([0., 0., 0])
 end_orn = np.array([0, 0, 0.])
 
@@ -46,7 +47,8 @@ for i in range(240 * 10):
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=targetPosition_init)
     sleep(1./24.)
     joint_positions, joint_velocities, joint_torques = robot_control.getJointStates(robot_id)
-    point_joint_base = DHParameter().DH_compute(targetPosition_init, end_point, end_orn)
+    # point_joint_pos = DHParameter().DH_compute(targetPosition_init)
+    joint_T = DHParameter().func_dh(targetPosition_init, end_point, end_orn)
 
 # %%
 numJoints = 11
@@ -61,6 +63,56 @@ for i in range(11):
     #     joint_orn_err[i-1] = [0.0, 0.0, 0.0]
     point_joint_base2 = DHParameter().DH_compute(targetPosition_init, joint_pos_err, joint_orn_err)
     print(point_joint_base1,'\n',point_joint_base2,'\n','************ \n','joint',i,'= ',point_joint_base1-point_joint_base2)
+
+# %%
+
+point_joint_pos, point_joint_orn = DHParameter().DH_compute(targetPosition_init)
+
+delta = joint_T.inv()
+
+
+theta = jacobian_k_-1 * [dx, dy, dz, theta_x, theta_y, theta_z].T
+    
+
+
+joint_T = DHParameter().func_dh(targetPosition_init)
+end_point_pos = [0, 0, 0]
+end_point_orn = [0, 0, 0]
+f1 = joint_T[3] - end_point_pos[0]
+f2 = joint_T[7] - end_point_pos[1]
+f3 = joint_T[11] - end_point_pos[2]
+f4 = joint_T[3] - end_point_orn[0]
+f5 = joint_T[7] - end_point_orn[1]
+f6 = joint_T[11] - end_point_orn[2]
+
+
+
+
+
+theta_x = 0
+theta_y = 0
+theta_z = 0
+dx = 0
+dy = 0
+dz = 0
+end_new = np.array([[0., -theta_z, theta_y, dx],
+                    [theta_z, 0., -theta_x, dy],
+                    [-theta_y, theta_x, 0., dz],
+                    [0, 0, 0, 0]])
+
+delta = np.matmul(joint_T, end_new)
+T_new = joint_T  + delta
+for i in range(1000):
+    theta_k = np.array([0, 0, 0, 0, 0, 0, 0, 0])
+    joint_T = DHParameter().func_dh(targetPosition_init)
+    delta_k = 
+    
+    
+    
+a = joint_T.inv()
+    
+    
+    
 # %%
 targetPosition_init = [0.3, 0.3, 0, -1.3, 0, 1.0, 0, 0, 0, 0, 0]
 robot_control.setJointPosition(robot_id, targetPosition_init, 11)

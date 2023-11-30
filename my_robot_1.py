@@ -7,6 +7,7 @@ Created on Fri Nov 17 19:43:50 2023
 """
 
 import os
+import sympy
 import xml.dom.minidom
 import shutil
 import numpy as np
@@ -16,7 +17,6 @@ import pybullet as p
 import pybullet_data
 from time import sleep, time
 import timeit
-from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate, ParameterInit, DHParameter, robot_control
 # import m_class
 from queue import Queue
 from threading import Event
@@ -29,7 +29,9 @@ from numpy.linalg import pinv
 import random
 import copy
 import matplotlib  
-import matplotlib.pyplot as plt  
+import matplotlib.pyplot as plt
+from m_class import SetSimulation, Thread_print, Robot_info, CameraOperate
+from m_class import ParameterInit, DHParameter, robot_control
 
 
 
