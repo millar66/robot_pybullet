@@ -576,10 +576,10 @@ class DHParameter :
               T_joint[i+1] = T_dot@base_pos_orn
             point_joint_pos[i+1] = T_joint[i+1][0:3, 3]
             point_joint_orn[i+1] = T_joint[i+1][0:3, 0:3]
-            p.addUserDebugLine(point_joint_pos[i], point_joint_pos[i+1], lineColorRGB=[0,0,1], lineWidth=5)
+            # p.addUserDebugLine(point_joint_pos[i], point_joint_pos[i+1], lineColorRGB=[0,0,1], lineWidth=5)
         # p.addUserDebugPoints(pointPositions=[point_joint_pos[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
         # p.addUserDebugPoints(pointPositions=point_joint_pos, pointColorsRGB=[[1,0,1]]*12, pointSize=6)
-        return point_joint_pos[numJoints], point_joint_orn[numJoints], 
+        return point_joint_pos[numJoints], point_joint_orn[numJoints]
 
     def func_dh(self, joint_positions=np.zeros((11)), end_pos=np.zeros((3)), end_orn=np.zeros((3)), joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3))):
         theta_rol = joint_positions.copy()
@@ -632,13 +632,15 @@ class DHParameter :
                 T_dot.append(T_dot[i-1] * T_NumJoint)
             T_simplify.append(T_dot[i].xreplace({n : round(n, 6) for n in T_dot[i].atoms(sympy.Number)}))
             T_joint.append(T_simplify[i] * base_pos)
+            # T_joint.append(T_simplify[i][ : ,0:3])
             # np_joint = T_joint[i].subs([(theta1,0),(theta2,0),(theta3,3)])[0:3].T
             np_joint = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6'
                                       ,'theta7','theta8','theta9','theta10','theta11'),T_joint[i],"numpy")
             point_joint[i+1] = np_joint(theta_rol[0],theta_rol[1],theta_rol[2],theta_rol[3],theta_rol[4]
                                         ,theta_rol[5],theta_rol[6],theta_rol[7],theta_rol[8],theta_rol[9]
                                         ,theta_rol[10])[0:3].T
-            p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
+            # p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
+        # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0.5,0.3]], pointSize=12)
         return T_simplify[numJoints-1]
 
 

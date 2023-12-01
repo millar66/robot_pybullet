@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Dec  1 19:00:22 2023
+
+@author: lihui.liu
+"""
+
 
 ParameterInit.pos_lim()
 
@@ -68,19 +76,14 @@ for i in range(11):
 
 end_point_pos, end_point_orn = DHParameter().DH_compute(Joint_pos)
 joint_T = DHParameter().func_dh(Joint_pos)
-Joint_pos_d = [-0.5, -0.5, 0.5, 0.5, -0.7, -0.1, -0.1, 0.5, 0.5, 0.5, 0.5]
-p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 # %%
 # delta = joint_T.inv()
 # theta = jacobian_k_-1 * [dx, dy, dz, theta_x, theta_y, theta_z].T
-# Joint_pos_d = [0.5, -0.5, 0.5, 0.7, -0.7, -0.1, -0.1, 0.5, 0.5, 0.5, 0.5]
+Joint_pos_d = [0.5, -0.5, 0.5, 0.5, -0.7, -0.1, -0.1, 0.5, 0.5, 0.5, 0.5]
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
-# end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos_d)
-# p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
-joint_T = DHParameter().func_dh(Joint_pos)
-Joint_pos = [0.5, -0.5, 0.5, 0.7, -0.7, -0.1, -0.1, 0.5, 0.5, 0.5, 0.5]
+end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos_d)
+Joint_pos = [0.5, 0.6, -0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
-end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos)
 sleep(1./240.)
 # Joint_pos = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 # end_point_pos, end_point_orn = DHParameter().DH_compute(Joint_pos)
@@ -117,88 +120,36 @@ JointJacobianNp = np.array(JointJacobian)
 JointJacobianNp = JointJacobianNp.astype(float)
 JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
 theta_i = np.array(Joint_pos[0:8])
-# theta_i[5] = theta_i[5] + np.pi/2
+theta_i[5] = theta_i[5] + np.pi/2
 f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), res, "numpy")
 f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), funcs, "numpy")
 
-base_x = end_point_pos_d[0]
-base_y = end_point_pos_d[1]
-base_z = end_point_pos_d[2]
-end_pos_new_1 = end_point_pos_d
-end_pos_new = end_point_pos_d
-i=0
-
-# %%
-for sin_t in range(240*2):
-    end_point_pos_d[0] = base_x + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
-    # end_point_pos_d[1] = base_y + 0.01 * np.sin(2*np.pi*1*sin_t/240.)
-    # end_point_pos_d[2] = base_z + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
-    f1 = joint_T[3] - end_point_pos_d[0]
-    f2 = joint_T[7] - end_point_pos_d[1]
-    f3 = joint_T[11] - end_point_pos_d[2]
-    f4 = joint_T[0] - end_point_orn_d[0][0]
-    f5 = joint_T[1] - end_point_orn_d[0][1]
-    f6 = joint_T[2] - end_point_orn_d[0][2]
-    f7 = joint_T[4] - end_point_orn_d[1][0]
-    f8 = joint_T[5] - end_point_orn_d[1][1]
-    f9 = joint_T[6] - end_point_orn_d[1][2]
-    f10 = joint_T[8] - end_point_orn_d[2][0]
-    f11 = joint_T[9] - end_point_orn_d[2][1]
-    f12 = joint_T[10] - end_point_orn_d[2][2]
-    funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12])
-    res = funcs.jacobian(args)
-    JointJacobian = res.subs([(theta1,Joint_pos[0]), (theta2,Joint_pos[1]), (theta3,Joint_pos[2]), (theta4,Joint_pos[3]), (theta5,Joint_pos[4]), (theta6,Joint_pos[5]), (theta7,Joint_pos[6]), (theta8,Joint_pos[7])])
+for i in range(10000):
+    # print(i)
+    # JointJacobian = res.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
+    JointJacobian = f_jacobian(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
     JointJacobianNp = np.array(JointJacobian)
     JointJacobianNp = JointJacobianNp.astype(float)
     JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
-    # theta_i = np.array(Joint_pos[0:8])
-    theta_i[5] = theta_i[5] + np.pi/2
-    f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), res, "numpy")
-    f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), funcs, "numpy")
-    p.addUserDebugLine(end_pos_new_1, end_pos_new, lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
-    end_pos_new_1 = end_pos_new
-    start_time = time()
-    for i in range(10000):
-        # print(i)
-        # JointJacobian = res.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
-        JointJacobian = f_jacobian(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-        JointJacobianNp = np.array(JointJacobian)
-        JointJacobianNp = JointJacobianNp.astype(float)
-        JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
-        # f_theta_i = funcs.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
-        f_theta_i = f_funcs(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-        f_theta_i_Np = np.array(f_theta_i)
-        f_theta_i_Np = f_theta_i_Np.astype(float)
-        f_theta_i_Np_Pinv = np.linalg.pinv(f_theta_i_Np).T
-        theta_i = theta_i - np.matmul(JointJacobianNpPinv, f_theta_i_Np).T[0]
-        err = np.linalg.norm(f_theta_i_Np,2)
-        # print(theta_i)
-        # print(err)
-        if err < 0.00003 :
-            # print('+' * 50)
-            # print('i = ',i)
-            break
-        if i > 500:
-            print('500')
-        elif i > 1000:
-            print('1000')
-        elif i > 3000:
-            print('3000')
-        elif i > 6000:
-            print('6000')
-    end_time = time()
-    # print(end_time - start_time)
-    theta_i[5] = theta_i[5] - np.pi/2
-    Joint_pos_new = np.concatenate((theta_i,Joint_pos[8:12]))
-    end_pos_new, end_point_new = DHParameter().DH_compute(Joint_pos_new)
-    p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
-    sleep(1./240.)
+    # f_theta_i = funcs.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
+    f_theta_i = f_funcs(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
+    f_theta_i_Np = np.array(f_theta_i)
+    f_theta_i_Np = f_theta_i_Np.astype(float)
+    f_theta_i_Np_Pinv = np.linalg.pinv(f_theta_i_Np).T
+    theta_i = theta_i - np.matmul(JointJacobianNpPinv, f_theta_i_Np).T[0]
+    err = np.linalg.norm(f_theta_i_Np,2)
+    # print(theta_i)
+    # print(err)
+    if err < 0.0003 :
+        print('+' * 50)
+        print('i = ',i)
+        break
 theta_i[5] = theta_i[5] - np.pi/2
-# print(err)
-# print(theta_i)
+print(err)
+print(theta_i)
 Joint_pos_new = np.concatenate((theta_i,Joint_pos[8:12]))
 end_point_pos_new, end_point_orn_new = DHParameter().DH_compute(Joint_pos_new)
-# p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
     
     
