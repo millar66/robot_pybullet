@@ -78,8 +78,8 @@ p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPosition
 # end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos_d)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 joint_T = DHParameter().func_dh(Joint_pos)
-Joint_pos = [0.5, -0.5, 0.5, 0.7, -0.7, -0.1, -0.1, 0.5, 0.5, 0.5, 0.5]
-p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
+Joint_pos = [0, 0.7, 0.2, 2.2, -0.5, 0.5, -0.1, 0.5, 0.5, 0.5, 0.5]
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos)
 sleep(1./240.)
 # Joint_pos = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
@@ -124,15 +124,19 @@ f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6',
 base_x = end_point_pos_d[0]
 base_y = end_point_pos_d[1]
 base_z = end_point_pos_d[2]
+orn_z = end_point_orn_d[2][2]
 end_pos_new_1 = end_point_pos_d
 end_pos_new = end_point_pos_d
 i=0
 
 # %%
+log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/end_z.mp4")
+
 for sin_t in range(240*2):
-    end_point_pos_d[0] = base_x + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
+    # end_point_pos_d[0] = base_x + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
     # end_point_pos_d[1] = base_y + 0.01 * np.sin(2*np.pi*1*sin_t/240.)
-    # end_point_pos_d[2] = base_z + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
+    end_point_pos_d[2] = base_z + 0.06 * np.sin(2*np.pi*4*sin_t/240.)
+    # end_point_orn_d[2][2] = orn_z + 0.1 * np.sin(2*np.pi*1*sin_t/240.)
     f1 = joint_T[3] - end_point_pos_d[0]
     f2 = joint_T[7] - end_point_pos_d[1]
     f3 = joint_T[11] - end_point_pos_d[2]
@@ -193,6 +197,7 @@ for sin_t in range(240*2):
     end_pos_new, end_point_new = DHParameter().DH_compute(Joint_pos_new)
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
     sleep(1./240.)
+p.stopStateLogging(log_id)
 theta_i[5] = theta_i[5] - np.pi/2
 # print(err)
 # print(theta_i)
