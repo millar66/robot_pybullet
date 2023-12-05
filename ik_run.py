@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Dec  4 17:02:10 2023
+
+@author: lihui.liu
+"""
+
 import os
 import sympy
 import xml.dom.minidom
@@ -110,7 +118,6 @@ joint_T = DHParameter().func_dh(Joint_pos)
 Joint_pos = [0, 0.7, 0.2, 2.2, -0.5, -0.0, 0, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_start = DHParameter().DH_compute(Joint_pos)
-TrocarPoint = end_point_start[0:3,3]
 sleep(1./240.)
 # Joint_pos = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 # end_point_pos, end_point_orn = DHParameter().DH_compute(Joint_pos)

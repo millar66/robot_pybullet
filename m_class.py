@@ -533,6 +533,10 @@ class DHParameter :
                                   [0, 1, 0, pos[i][1] + joint_pos_err[i][1]/1000 + joint_positions[i]],
                                   [0, 0, 1, pos[i][2] + joint_pos_err[i][2]/1000],
                                   [0, 0, 0, 1        ]])
+                # Td[i] = np.array([[1, 0, 0, pos[i][0] + joint_pos_err[i][0]/1000],
+                #                   [0, 1, 0, pos[i][1] + joint_pos_err[i][1]/1000],
+                #                   [0, 0, 1, pos[i][2] + joint_pos_err[i][2]/1000],
+                #                   [0, 0, 0, 1        ]])
             else:
                 orn_cos_z[i] = np.cos(orn[i][2] + joint_orn_err[i][2]/1000 + joint_positions[i])
                 orn_sin_z[i] = np.sin(orn[i][2] + joint_orn_err[i][2]/1000 + joint_positions[i])
@@ -579,7 +583,8 @@ class DHParameter :
             # p.addUserDebugLine(point_joint_pos[i], point_joint_pos[i+1], lineColorRGB=[0,0,1], lineWidth=5)
         # p.addUserDebugPoints(pointPositions=[point_joint_pos[numJoints]], pointColorsRGB=[[1,0,1]], pointSize=6)
         # p.addUserDebugPoints(pointPositions=point_joint_pos, pointColorsRGB=[[1,0,1]]*12, pointSize=6)
-        return point_joint_pos[numJoints], point_joint_orn[numJoints]
+        # return point_joint_pos[numJoints], point_joint_orn[numJoints]
+        return T_joint[i+1]
 
     def func_dh(self, joint_positions=np.zeros((11)), end_pos=np.zeros((3)), end_orn=np.zeros((3)), joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3))):
         theta_rol = joint_positions.copy()
