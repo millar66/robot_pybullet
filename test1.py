@@ -107,13 +107,38 @@ p.addUserDebugLine([0, 0, 0], [0, 0, 1], lineColorRGB=[0,1,0], lineWidth=5)
 # end_point_pos_d, end_point_orn_d = DHParameter().DH_compute(Joint_pos_d)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 joint_T = DHParameter().func_dh(Joint_pos)
-Joint_pos = [0, 0.7, 0.2, 2.2, -0.5, -0.0, 0, 0.5, 0.5, 0.5, 0.5]
+Joint_pos = [0, 0.7, 0.2, 2.2, -0.5, -0.0, 0.15, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_start = DHParameter().DH_compute(Joint_pos)
 TrocarPoint = end_point_start[0:3,3]
 sleep(1./240.)
 # Joint_pos = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 # end_point_pos, end_point_orn = DHParameter().DH_compute(Joint_pos)
+w_a = 2.38
+w_b = 2.28
+theta_i = np.array(Joint_pos[0:8])
+# x1 = 2 / 6.28 * theta_i[0]
+# x2 = 2 / 6.28 * theta_i[1]
+# x3 = 2 / 6.28 * theta_i[2]
+# x4 = 2 / 6.28 * theta_i[3]
+# x5 = 2 / 6.28 * theta_i[4]
+# x6 = 2 / 6.28 * theta_i[5]
+# x7 = 2 / 0.4 * theta_i[6]
+# x8 = 2 / 6.28 * theta_i[7]
+
+# w1 = np.piecewise(x1, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w2 = np.piecewise(x2, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w3 = np.piecewise(x3, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w4 = np.piecewise(x4, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w5 = np.piecewise(x5, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w6 = np.piecewise(x6, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w7 = np.piecewise(x7, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+# w8 = np.piecewise(x8, [-1 < x1 < 0, 1 > x1 >= 0], [lambda x:-0.5 * w_b / (np.exp(w_a*(1+x1))-1), lambda x:0.5 * w_b / (np.exp(w_a*(1-x1))-1)])
+
+# x = sympy.Symbol('x')
+# f = x
+# g = -x
+# w = sympy.Piecewise((g, x<0), (f, True))
 
 # theta = sympy.symbols('theta1:12')
 theta1 = sympy.symbols('theta1')
@@ -124,34 +149,52 @@ theta5 = sympy.symbols('theta5')
 theta6 = sympy.symbols('theta6')
 theta7 = sympy.symbols('theta7')
 theta8 = sympy.symbols('theta8')
+thetak1 = sympy.symbols('thetak1')
+thetak2 = sympy.symbols('thetak2')
+thetak3 = sympy.symbols('thetak3')
+thetak4 = sympy.symbols('thetak4')
+thetak5 = sympy.symbols('thetak5')
+thetak6 = sympy.symbols('thetak6')
+thetak7 = sympy.symbols('thetak7')
+thetak8 = sympy.symbols('thetak8')
+end1 = sympy.symbols('end1')
+end2 = sympy.symbols('end2')
+end3 = sympy.symbols('end3')
+end4 = sympy.symbols('end4')
+end5 = sympy.symbols('end5')
+end6 = sympy.symbols('end6')
+end7 = sympy.symbols('end7')
+end8 = sympy.symbols('end8')
+end9 = sympy.symbols('end9')
+end10 = sympy.symbols('end10')
+end11 = sympy.symbols('end11')
+end12 = sympy.symbols('end12')
 # f = sympy.symbols("f1:12")
-f1 = joint_T[0] - end_point_start[0][0]
-f2 = joint_T[1] - end_point_start[0][1]
-f3 = joint_T[2] - end_point_start[0][2]
-f4 = joint_T[3] - end_point_start[0][3]
-f5 = joint_T[4] - end_point_start[1][0]
-f6 = joint_T[5] - end_point_start[1][1]
-f7 = joint_T[6] - end_point_start[1][2]
-f8 = joint_T[7] - end_point_start[1][3]
-f9 = joint_T[8] - end_point_start[2][0]
-f10 = joint_T[9] - end_point_start[2][1]
-f11 = joint_T[10] - end_point_start[2][2]
-f12 = joint_T[11] - end_point_start[2][3]
-f13 = theta7 - Joint_pos[6]
-# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8])
-funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13])
-# funcs = sympy.Matrix(f)
-args = sympy.Matrix([theta1, theta2, theta3, theta4, theta5, theta6, theta7, theta8])
-res = funcs.jacobian(args)
-JointJacobian = res.subs([(theta1,Joint_pos[0]), (theta2,Joint_pos[1]), (theta3,Joint_pos[2]), (theta4,Joint_pos[3]), (theta5,Joint_pos[4]), (theta6,Joint_pos[5]), (theta7,Joint_pos[6]), (theta8,Joint_pos[7])])
-JointJacobianNp = np.array(JointJacobian)
-JointJacobianNp = JointJacobianNp.astype(float)
-JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
-theta_i = np.array(Joint_pos[0:8])
-# theta_i[5] = theta_i[5] + np.pi/2
-f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), res, "numpy")
-f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), funcs, "numpy")
+# f1 = joint_T[0] - end_point_start[0][0]
+# f2 = joint_T[1] - end_point_start[0][1]
+# f3 = joint_T[2] - end_point_start[0][2]
+# f4 = joint_T[3] - end_point_start[0][3]
+# f5 = joint_T[4] - end_point_start[1][0]
+# f6 = joint_T[5] - end_point_start[1][1]
+# f7 = joint_T[6] - end_point_start[1][2]
+# f8 = joint_T[7] - end_point_start[1][3]
+# f9 = joint_T[8] - end_point_start[2][0]
+# f10 = joint_T[9] - end_point_start[2][1]
+# f11 = joint_T[10] - end_point_start[2][2]
+# f12 = joint_T[11] - end_point_start[2][3]
 
+# # funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8])
+# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12])
+# # funcs = sympy.Matrix(f)
+args = sympy.Matrix([theta1, theta2, theta3, theta4, theta5, theta6, theta7, theta8])
+# res = funcs.jacobian(args)
+# JointJacobian = res.subs([(theta1,Joint_pos[0]), (theta2,Joint_pos[1]), (theta3,Joint_pos[2]), (theta4,Joint_pos[3]), (theta5,Joint_pos[4]), (theta6,Joint_pos[5]), (theta7,Joint_pos[6]), (theta8,Joint_pos[7])])
+# JointJacobianNp = np.array(JointJacobian)
+# JointJacobianNp = JointJacobianNp.astype(float)
+# JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
+# theta_i[5] = theta_i[5] + np.pi/2
+# f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), res, "numpy")
+# f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), funcs, "numpy")
 base_x = end_point_start[0][3]
 base_y = end_point_start[1][3]
 base_z = end_point_start[2][3]
@@ -162,7 +205,7 @@ end_point_k = end_point_start
 
 run_x = 0
 run_y = 0
-run_z = 0.1
+run_z = 0.2
 end_roll = 0
 end_pitch = 0
 end_yaw = 0
@@ -180,59 +223,65 @@ T_step = np.array([[1, 0, 0, step_x],
                    [0, 1, 0, step_y],
                    [0, 0, 1, step_z],
                    [0, 0, 0, 1]])
+err_list = []
+theta_i_list = [theta_i]
+
+f1 = joint_T[0] - end1
+f2 = joint_T[1] - end2
+f3 = joint_T[2] - end3
+f4 = joint_T[3] - end4
+f5 = joint_T[4] - end5
+f6 = joint_T[5] - end6
+f7 = joint_T[6] - end7
+f8 = joint_T[7] - end8
+f9 = joint_T[8] - end9
+f10 = joint_T[9] - end10
+f11 = joint_T[10] - end11
+f12 = joint_T[11] - end12
+f13 = (sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta1))-1) * (theta1-thetak1)**2, theta1 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta1))-1) * (theta1-thetak1)**2, theta1 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta2))-1) * (theta2-thetak2)**2, theta2 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta2))-1) * (theta2-thetak2)**2, theta2 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta3))-1) * (theta3-thetak3)**2, theta3 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta3))-1) * (theta3-thetak3)**2, theta3 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta4))-1) * (theta4-thetak4)**2, theta4 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta4))-1) * (theta4-thetak4)**2, theta4 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta5))-1) * (theta5-thetak5)**2, theta5 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta5))-1) * (theta5-thetak5)**2, theta5 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta6))-1) * (theta6-thetak6)**2, theta6 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta6))-1) * (theta6-thetak6)**2, theta6 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta7))-1) * (theta7-thetak7)**2, theta7 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta7))-1) * (theta7-thetak7)**2, theta7 >= 0)) + \
+      sympy.Piecewise((0.5 * w_b / (sympy.exp(w_a*(1+2/6.28*theta8))-1) * (theta8-thetak8)**2, theta8 < 0), (0.5 * w_b / (sympy.exp(w_a*(1-2/6.28*theta8))-1) * (theta8-thetak8)**2, theta8 >= 0)))
+funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13])
+res = funcs.jacobian(args)
+start_time4 = time()
+f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8',\
+        'end1','end2','end3','end4','end5','end6','end7','end8','end9','end10','end11','end12',\
+        'thetak1','thetak2','thetak3','thetak4','thetak5','thetak6','thetak7','thetak8'), res, "numpy")
+f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8',\
+        'end1','end2','end3','end4','end5','end6','end7','end8','end9','end10','end11','end12',\
+        'thetak1','thetak2','thetak3','thetak4','thetak5','thetak6','thetak7','thetak8'), funcs, "numpy")
 
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/end_z.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_no_lim.mp4")
 
-for j in range(240):
+for j in range(2):
 # for time_sin in range(240):
     
     start_time1 = time()
     end_point_k = np.matmul(end_point_k, T_step)
     # end_point_k[2][3] = end_point_k[2][3] + 0.01
     
-    f1 = joint_T[0] - end_point_k[0][0]
-    f2 = joint_T[1] - end_point_k[0][1]
-    f3 = joint_T[2] - end_point_k[0][2]
-    f4 = joint_T[3] - end_point_k[0][3]
-    f5 = joint_T[4] - end_point_k[1][0]
-    f6 = joint_T[5] - end_point_k[1][1]
-    f7 = joint_T[6] - end_point_k[1][2]
-    f8 = joint_T[7] - end_point_k[1][3]
-    f9 = joint_T[8] - end_point_k[2][0]
-    f10 = joint_T[9] - end_point_k[2][1]
-    f11 = joint_T[10] - end_point_k[2][2]
-    f12 = joint_T[11] - end_point_k[2][3]
-    f13 = theta7 - Joint_pos[6]
-    funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13])
-    res = funcs.jacobian(args)
-    start_time3 = time()
-    # JointJacobian = res.subs([(theta1,Joint_pos[0]), (theta2,Joint_pos[1]), (theta3,Joint_pos[2]), (theta4,Joint_pos[3]), (theta5,Joint_pos[4]), (theta6,Joint_pos[5]), (theta7,Joint_pos[6]), (theta8,Joint_pos[7])])
-    start_time4 = time()
-    # JointJacobianNp = np.array(JointJacobian)
-    # JointJacobianNp = JointJacobianNp.astype(float)
-    # JointJacobianNpPinv = np.linalg.pinv(JointJacobianNp)
-    # theta_i = np.array(Joint_pos[0:8])
     theta_i[5] = theta_i[5] + np.pi/2
-    f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), res, "numpy")
-    f_funcs = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), funcs, "numpy")
     p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
     end_pos_new_1 = end_pos_new
     start_time2 = time()
     for i in range(10000):
-        # print(i)
-        # JointJacobian = res.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
-        JointJacobian = f_jacobian(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-        # JointJacobianNp = np.array(JointJacobian)
-        # JointJacobianNp = JointJacobianNp.astype(float)
+        JointJacobian = f_jacobian(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7],\
+            end_point_k[0][0],end_point_k[0][1],end_point_k[0][2],end_point_k[0][3],\
+            end_point_k[1][0],end_point_k[1][1],end_point_k[1][2],end_point_k[1][3],\
+            end_point_k[2][0],end_point_k[2][1],end_point_k[2][2],end_point_k[2][3],\
+            theta_ik[0],theta_ik[1],theta_ik[2],theta_ik[3],theta_ik[4],theta_ik[5],theta_ik[6],theta_ik[7])
         JointJacobianNpPinv = np.linalg.pinv(JointJacobian)
-        # f_theta_i = funcs.subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2]), (theta4,theta_i[3]), (theta5,theta_i[4]), (theta6,theta_i[5]), (theta7,theta_i[6]), (theta8,theta_i[7])])
         f_theta_i = f_funcs(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-        # f_theta_i_Np = np.array(f_theta_i)
-        # f_theta_i_Np = f_theta_i_Np.astype(float)
-        # f_theta_i_Np_Pinv = np.linalg.pinv(f_theta_i).T
         theta_i = theta_i - np.matmul(JointJacobianNpPinv, f_theta_i).T[0]
         err = np.linalg.norm(f_theta_i,2)
+        err_list.append(err)
+        theta_i_list.append(theta_i)
         # print(theta_i)
         # print(err)
         if err < 0.00003 :
@@ -382,9 +431,28 @@ print(t.n0, t.n1, t.n2, t.n3, t.n4, t.n5)
 
 
 
+def func2(y):
+    return y*100
 
+# func2 = y*100
+x = np.arange(0,10)
+print(x)
+xx=np.piecewise(x, [x < 4, x >= 6], [func2, 1])
 
+xxxx=np.piecewise(x, [x < 4, x >= 6], [lambda x:x**2, lambda x:x*100, 157])
+print(xx)
 
+print(xxxx)
+
+x = sympy.Symbol('x')
+f = x**2
+g = x - 2
+h = sympy.log(x)
+p = sympy.Piecewise((f, x<0), (g, x<2), (h, True))
+
+print(p.subs(x, -2))
+print(p.subs(x, 1))
+print(p.subs(x, 10))
 
 
 
@@ -400,6 +468,21 @@ print(end_time - start_time)
 
 
 p.addUserDebugLine(end_point_end[0:3,3], end_point_start[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
+
+
+
+n = sympy.Symbol('n')
+f= (1/2)**n
+sympy.summation(f,(n,0,3)) #如下左图所示
+ 
+#2、如果求和最终没有确定值，则会返回求和表达式
+f= 1/sympy.log(n) +3
+sympy.summation(f,(n,0,sympy.oo)) #如下右图所示
+
+
+
+
+
 
 
 

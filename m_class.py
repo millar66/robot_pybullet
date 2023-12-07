@@ -646,9 +646,27 @@ class DHParameter :
                                         ,theta_rol[10])[0:3].T
             # p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
         # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0.5,0.3]], pointSize=12)
+        
         return T_simplify[numJoints-1]
-
-
+    
+    # def T_joint(self, theta=np.zeros(11)):
+    #     T_joint[0] = np.array((1.0*(((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*cos(theta5) - 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*sin(theta5))*cos(theta6) - 1.0*(-1.0*(-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*sin(theta4) + 1.0*sin(theta2)*cos(theta1)*cos(theta4))*sin(theta6))*cos(theta8) + 1.0*(1.0*((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*sin(theta5) + 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*cos(theta5))*sin(theta8))
+    #     T_joint[1] = np.array()
+    #     T_joint[2] = np.array()
+    #     T_joint[3] = np.array()
+    #     T_joint[4] = np.array()
+    #     T_joint[5] = np.array()
+    #     T_joint[6] = np.array()
+    #     T_joint[7] = np.array()
+    #     T_joint[8] = np.array()
+    #     T_joint[9] = np.array()
+    #     T_joint[10] = np.array()
+    #     T_joint[11] = np.array()
+    #     T_joint[12] = np.array(0)
+    #     T_joint[13] = np.array(0)
+    #     T_joint[14] = np.array(0)
+    #     T_joint[15] = np.array(1)
+    
 
 
 class robot_control :
