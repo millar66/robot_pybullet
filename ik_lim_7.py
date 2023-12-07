@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Dec  7 20:17:12 2023
+
+@author: lihui.liu
+"""
+
 import os
 import sympy
 import xml.dom.minidom
