@@ -108,17 +108,16 @@ p.addUserDebugLine([0, 0, 0], [0, 0, 1], lineColorRGB=[0,1,0], lineWidth=5)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 joint_T = DHParameter().func_dh(Joint_pos)
 Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 1.0, 0, 0.5, 0.5, 0.5, 0.5]
-# Joint_pos = [0.3295,  0.7938,  0.3496,  0.4960, -0.5383, 1.2591,  0.3695,  0.6088, 0.5, 0.5, 0.5]
+Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 0.3, 0, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_start = DHParameter().DH_compute(Joint_pos)
 TrocarPoint = end_point_start[0:3,3]
 sleep(1./240.)
 # Joint_pos = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 # end_point_pos, end_point_orn = DHParameter().DH_compute(Joint_pos)
-wa = 19.691
-wb = 18872
-w_a = 19.691
-w_b = 18872
+
+w_a = 5.78397543858225
+w_b = 2724.65773
 theta_i = np.array(Joint_pos[0:8])
 theta_ik = np.array(Joint_pos[0:8])
 
@@ -165,13 +164,16 @@ DRV1_HIGH = 2.85
 DRV2_LOW  = -2.181
 DRV2_HIGH = 2.181
 DRV3_LOW  = -4.4
-DRV3_HIGH = 1.25
+DRV3_HIGH = 2.25
+# DRV3_HIGH = 1.25
 DRV4_LOW  = 0.3
 DRV4_HIGH = 2.8
 DRV5_LOW  = -2.70526
 DRV5_HIGH = 2.70526
-DRV6_LOW  = 0.61 + 1.5707
-DRV6_HIGH = 2.53 + 1.5707
+# DRV6_LOW  = 0.61 + 1.5707
+# DRV6_HIGH = 2.53 + 1.5707
+DRV6_LOW  = -0.83 + 1.5707
+DRV6_HIGH = 0.61 + 1.5707
 DRV7_LOW  = -0.07
 DRV7_HIGH = 0.07
 DRV8_LOW  = -5.75
@@ -204,9 +206,9 @@ f15 = sympy.Piecewise((1e10,thetak3 < DRV3_LOW), (-2/(DRV3_HIGH-DRV3_LOW)*(theta
 f16 = sympy.Piecewise((1e10,thetak4 < DRV4_LOW), (-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < (DRV4_HIGH + DRV4_LOW)/2), (2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < DRV4_HIGH), (1e10, True))
 f17 = sympy.Piecewise((1e10,thetak5 < DRV5_LOW), (-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < (DRV5_HIGH + DRV5_LOW)/2), (2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < DRV5_HIGH), (1e10, True))
 f18 = sympy.Piecewise((1e10,thetak6 < DRV6_LOW), (-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < (DRV6_HIGH + DRV6_LOW)/2), (2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < DRV6_HIGH), (1e10, True))
-f19 = sympy.Piecewise((1e10,thetak7 < DRV7_LOW), (-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10, True))
+# f19 = sympy.Piecewise((1e10,thetak7 < DRV7_LOW), (-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10, True))
 f20 = sympy.Piecewise((1e10,thetak8 < DRV8_LOW), (-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < (DRV8_HIGH + DRV8_LOW)/2), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < DRV8_HIGH), (1e10, True))
-# f13 = theta7
+f19 = theta7
 # funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13])
 funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20])
 res = funcs.jacobian(args)
@@ -247,7 +249,7 @@ T_step = np.array([[1, 0, 0, step_x],
 err_list = []
 theta_i_list = [theta_i]
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_lim_step_large.mp4")
+log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint6_lim_step_large.mp4")
 
 for j in range(900):
 # for time_sin in range(240):
@@ -277,7 +279,7 @@ for j in range(900):
         theta_i = theta_i - np.matmul(JointJacobianNpPinv, f_theta_i).T[0]
         # print(theta_i)
         # print(err)
-        if err < 3e-4:
+        if err < 3e-3:
             # print('+' * 50)
             # print('i = ',i)
             break
@@ -296,7 +298,7 @@ for j in range(900):
     end_pos_new = DHParameter().DH_compute(Joint_pos_new)
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
     sleep(1./240.)
-# p.stopStateLogging(log_id)
+p.stopStateLogging(log_id)
 # theta_i[5] = theta_i[5] - np.pi/2
 Joint_pos_new = np.concatenate((theta_i,Joint_pos[8:12]))
 end_point_new = DHParameter().DH_compute(Joint_pos_new)
@@ -463,8 +465,8 @@ print(p.subs(x, 1))
 print(p.subs(x, 10))
 
 a, b, c = sympy.symbols('a b c')
-eqs = [sympy.Eq(0.5*b/(sympy.exp(a*(1-0.5))-1), 0.5),
-       sympy.Eq(0.8*b/(sympy.exp(a*(1-0.8))-1), 300)]
+eqs = [sympy.Eq(0.5*b/(sympy.exp(a*(1-0.5))-1), 80),
+       sympy.Eq(0.8*b/(sympy.exp(a*(1-0.8))-1), 1000)]
        # sympy.Eq(-x - y + 5 * z, 42)]
 print(sympy.solve(eqs, [a, b, c]))
 
@@ -474,8 +476,8 @@ from matplotlib import pyplot as plt
 plt.rcParams['font.sans-serif'] = ['SimHei'] #用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False #用来正常显示负号
 
-wa = 19.691
-wb = 18872
+wa = 5.78397543858225
+wb = 2724.65773
 # 一元一次函数图像
 x = np.arange(-1, 1, 0.1)
 y = np.piecewise(x, [x<0, 0<x], [lambda x:-wb*x/(np.exp(wa*(1+x))-1), lambda x:wb*x/(np.exp(wa*(1-x))-1)])
