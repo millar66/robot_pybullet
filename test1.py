@@ -108,7 +108,7 @@ p.addUserDebugLine([0, 0, 0], [0, 0, 1], lineColorRGB=[0,1,0], lineWidth=5)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 joint_T = DHParameter().func_dh(Joint_pos)
 Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 1.0, 0, 0.5, 0.5, 0.5, 0.5]
-Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 0.3, 0, 0.5, 0.5, 0.5, 0.5]
+Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 0.3, 0.06, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_start = DHParameter().DH_compute(Joint_pos)
 TrocarPoint = end_point_start[0:3,3]
@@ -200,17 +200,18 @@ f12 = joint_T[11] - end12
 #        sympy.Piecewise((1e10,thetak7 < DRV7_LOW), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10, True)) + \
 #        sympy.Piecewise((1e10,thetak8 < DRV8_LOW), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < (DRV8_HIGH + DRV8_LOW)/2), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < DRV8_HIGH), (1e10, True)))
 
-f13 = sympy.Piecewise((1e10,thetak1 < DRV1_LOW), (-2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)))-1) * (theta1-thetak1)**2, thetak1 < (DRV1_HIGH + DRV1_LOW)/2), (2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)))-1) * (theta1-thetak1)**2, thetak1 < DRV1_HIGH), (1e10, True))
-f14 = sympy.Piecewise((1e10,thetak2 < DRV2_LOW), (-2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)))-1) * (theta2-thetak2)**2, thetak2 < (DRV2_HIGH + DRV2_LOW)/2), (2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)))-1) * (theta2-thetak2)**2, thetak2 < DRV2_HIGH), (1e10, True))
-f15 = sympy.Piecewise((1e10,thetak3 < DRV3_LOW), (-2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)))-1) * (theta3-thetak3)**2, thetak3 < (DRV3_HIGH + DRV3_LOW)/2), (2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)))-1) * (theta3-thetak3)**2, thetak3 < DRV3_HIGH), (1e10, True))
-f16 = sympy.Piecewise((1e10,thetak4 < DRV4_LOW), (-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < (DRV4_HIGH + DRV4_LOW)/2), (2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < DRV4_HIGH), (1e10, True))
-f17 = sympy.Piecewise((1e10,thetak5 < DRV5_LOW), (-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < (DRV5_HIGH + DRV5_LOW)/2), (2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < DRV5_HIGH), (1e10, True))
-f18 = sympy.Piecewise((1e10,thetak6 < DRV6_LOW), (-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < (DRV6_HIGH + DRV6_LOW)/2), (2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < DRV6_HIGH), (1e10, True))
-# f19 = sympy.Piecewise((1e10,thetak7 < DRV7_LOW), (-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10, True))
-f20 = sympy.Piecewise((1e10,thetak8 < DRV8_LOW), (-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < (DRV8_HIGH + DRV8_LOW)/2), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < DRV8_HIGH), (1e10, True))
-f19 = theta7
-# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13])
-funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20])
+f13 = sympy.Piecewise((1e10*theta1,thetak1 < DRV1_LOW), (-2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)))-1) * (theta1-thetak1)**2, thetak1 < (DRV1_HIGH + DRV1_LOW)/2), (2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV1_HIGH-DRV1_LOW)*(thetak1-(DRV1_HIGH+DRV1_LOW)/2)))-1) * (theta1-thetak1)**2, thetak1 < DRV1_HIGH), (1e10*theta1, True))
+f14 = sympy.Piecewise((1e10*theta2,thetak2 < DRV2_LOW), (-2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)))-1) * (theta2-thetak2)**2, thetak2 < (DRV2_HIGH + DRV2_LOW)/2), (2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV2_HIGH-DRV2_LOW)*(thetak2-(DRV2_HIGH+DRV2_LOW)/2)))-1) * (theta2-thetak2)**2, thetak2 < DRV2_HIGH), (1e10*theta2, True))
+f15 = sympy.Piecewise((1e10*theta3,thetak3 < DRV3_LOW), (-2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)))-1) * (theta3-thetak3)**2, thetak3 < (DRV3_HIGH + DRV3_LOW)/2), (2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV3_HIGH-DRV3_LOW)*(thetak3-(DRV3_HIGH+DRV3_LOW)/2)))-1) * (theta3-thetak3)**2, thetak3 < DRV3_HIGH), (1e10*theta3, True))
+f16 = sympy.Piecewise((1e10*theta4,thetak4 < DRV4_LOW), (-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < (DRV4_HIGH + DRV4_LOW)/2), (2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < DRV4_HIGH), (1e10*theta4, True))
+f17 = sympy.Piecewise((1e10*theta5,thetak5 < DRV5_LOW), (-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < (DRV5_HIGH + DRV5_LOW)/2), (2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < DRV5_HIGH), (1e10*theta5, True))
+f18 = sympy.Piecewise((1e10*theta6,thetak6 < DRV6_LOW), (-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < (DRV6_HIGH + DRV6_LOW)/2), (2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < DRV6_HIGH), (1e10*theta6, True))
+f19 = sympy.Piecewise((1e10*theta8,thetak7 < DRV7_LOW), (-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10*theta7, True))
+f20 = sympy.Piecewise((1e10*theta7,thetak8 < DRV8_LOW), (-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < (DRV8_HIGH + DRV8_LOW)/2), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < DRV8_HIGH), (1e10*theta8, True))
+# f18 = theta6 - 0.3 - 1.5707
+# f19 = theta7 - 0.06
+funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f18, f19])
+# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20])
 res = funcs.jacobian(args)
 start_time4 = time()
 f_jacobian = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8',\
@@ -249,7 +250,7 @@ T_step = np.array([[1, 0, 0, step_x],
 err_list = []
 theta_i_list = [theta_i]
 # %%
-log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint6_lim_step_large.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint6_lim_step.mp4")
 
 for j in range(900):
 # for time_sin in range(240):
@@ -273,13 +274,15 @@ for j in range(900):
             end_point_k[1][0],end_point_k[1][1],end_point_k[1][2],end_point_k[1][3],\
             end_point_k[2][0],end_point_k[2][1],end_point_k[2][2],end_point_k[2][3],\
             theta_ik[0],theta_ik[1],theta_ik[2],theta_ik[3],theta_ik[4],theta_ik[5],theta_ik[6],theta_ik[7])
-        err = np.linalg.norm(f_theta_i,2)
+        # if f_theta_i[]
+        err_robot = np.linalg.norm(f_theta_i[0:12],2)
+        err_lim = np.linalg.norm(f_theta_i[12:],2)
         err_list.append(err)
         theta_i_list.append(theta_i)
         theta_i = theta_i - np.matmul(JointJacobianNpPinv, f_theta_i).T[0]
         # print(theta_i)
         # print(err)
-        if err < 3e-3:
+        if err_robot < 3e-6:
             # print('+' * 50)
             # print('i = ',i)
             break
@@ -298,7 +301,7 @@ for j in range(900):
     end_pos_new = DHParameter().DH_compute(Joint_pos_new)
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
     sleep(1./240.)
-p.stopStateLogging(log_id)
+# p.stopStateLogging(log_id)
 # theta_i[5] = theta_i[5] - np.pi/2
 Joint_pos_new = np.concatenate((theta_i,Joint_pos[8:12]))
 end_point_new = DHParameter().DH_compute(Joint_pos_new)
