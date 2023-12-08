@@ -108,7 +108,7 @@ p.addUserDebugLine([0, 0, 0], [0, 0, 1], lineColorRGB=[0,1,0], lineWidth=5)
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_d)
 joint_T = DHParameter().func_dh(Joint_pos)
 Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 1.0, 0, 0.5, 0.5, 0.5, 0.5]
-Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 0.3, 0.0, 0.5, 0.5, 0.5, 0.5]
+Joint_pos = [0, 0.7, 0.8, 2.3, -0.5, 0.3, -0.06, 0.5, 0.5, 0.5, 0.5]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos)
 end_point_start = DHParameter().DH_compute(Joint_pos)
 TrocarPoint = end_point_start[0:3,3]
@@ -119,7 +119,7 @@ sleep(1./240.)
 w_a = 5.78397543858225
 w_b = 4.24657731
 # w_a7 = 5.78397543858225
-w_b7 = 1424657731
+w_b7 = 14246577.31
 theta_i = np.array(Joint_pos[0:8])
 theta_ik = np.array(Joint_pos[0:8])
 
@@ -255,7 +255,7 @@ T_step = np.array([[1, 0, 0, step_x],
 err_list = []
 theta_i_list = [theta_i]
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_z_ok_from0.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_z_ok_form_low.mp4")
 
 for j in range(900):
 # for time_sin in range(240):
