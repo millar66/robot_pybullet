@@ -39,10 +39,10 @@ p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1) # 1:打开渲染
 p.setGravity(0, 0, -9.81)
 p.setRealTimeSimulation(1)
 
-p.resetDebugVisualizerCamera(cameraTargetPosition=[0.05,0.02,0.39],\
-                             cameraDistance=1.20,\
-                             cameraPitch=-30.40,\
-                             cameraYaw=24.40) #转变视角
+p.resetDebugVisualizerCamera(cameraTargetPosition=[0.36,-0.37,-0.17],\
+                             cameraDistance=1.60,\
+                             cameraPitch=-33.2,\
+                             cameraYaw=224.40) #转变视角
 
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 plane_id = p.loadURDF("plane.urdf", useMaximalCoordinates=False)
@@ -232,8 +232,8 @@ f_19 = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','th
         'end1','end2','end3','end4','end5','end6','end7','end8','end9','end10','end11','end12',\
         'thetak1','thetak2','thetak3','thetak4','thetak5','thetak6','thetak7','thetak8'), f19, "numpy")
 
-run_x = 0
-run_y = 0.
+run_x = -0.2
+run_y = -0.2
 run_z = 0.2
 end_roll = 0
 end_pitch = 0
@@ -257,7 +257,7 @@ theta_i_list = [theta_i]
 # %%
 # log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_z_ok_form_low.mp4")
 
-for j in range(900):
+for j in range(600):
 # for time_sin in range(240):
 
     end_point_k = np.matmul(end_point_k, T_step)
