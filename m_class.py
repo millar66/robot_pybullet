@@ -649,6 +649,69 @@ class DHParameter :
         
         return T_simplify[numJoints-1]
     
+    def func_dh_all(self, joint_positions=np.zeros((11)), end_pos=np.zeros((3)), end_orn=np.zeros((3)), joint_pos_err=np.zeros((11, 3)), joint_orn_err=np.zeros((11, 3))):
+        theta_rol = joint_positions.copy()
+        base_pos = np.append(end_pos,1).reshape(4,1)
+        numJoints = 8
+        alpha = [0, -np.pi/2, np.pi/2, np.pi/2, -np.pi/2, -np.pi/2, 0, 0, np.pi/2, np.pi/2, 0]
+        A = [0, 0, 0, -0.04951, 0.04951, 0, 0, -0.04050, 0, 0.01125, 0]
+        # theta_rol = np.array([0., 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        # theta_rol = np.array([0, 0.5, -0.5, 0.5, -0.5, -0.5, 0.1, 0.5, 0.5, 0.5, 0.5])
+        theta_rol[5] = theta_rol[5] + np.pi/2
+        theta_rol[8] = theta_rol[8] + np.pi/2
+        L = [0.27985, 0, 0.36330, 0, 0.36665, 0, 0, 0.55443-0.16, 0.16, 0, 0]
+        T_dot = []
+        T_simplify = []
+        # T_dot = np.zeros((numJoints, 4, 4))
+        T_joint = []
+        # T_joint.resize(12,4)
+        point_joint = np.zeros((numJoints+1, 3))
+        theta = sympy.symbols("theta1:12")
+        # theta1 = sympy.symbols("theta1")
+        # theta2 = sympy.symbols("theta2")
+        # theta3 = sympy.symbols("theta3")
+        # theta4 = sympy.symbols("theta4")
+        # theta5 = sympy.symbols("theta5")
+        # theta6 = sympy.symbols("theta6")
+        # theta7 = sympy.symbols("theta7")
+        # theta8 = sympy.symbols("theta8")
+        # theta9 = sympy.symbols("theta9")
+        # theta10 = sympy.symbols("theta10")
+        # theta11 = sympy.symbols("theta11")
+        T = []
+
+        for i in range(numJoints):
+            if i != 6:
+                T_NumJoint = sympy.Matrix([
+                    [sympy.cos(theta[i]),             -sympy.sin(theta[i]),               0,             A[i]],
+                    [np.cos(alpha[i])*sympy.sin(theta[i]), sympy.cos(theta[i])*np.cos(alpha[i]), -np.sin(alpha[i]), -np.sin(alpha[i])*L[i]],
+                    [sympy.sin(theta[i])*np.sin(alpha[i]), sympy.cos(theta[i])*np.sin(alpha[i]),  np.cos(alpha[i]),  np.cos(alpha[i])*L[i]],
+                    [0,                                0,                                 0,             1]])
+            else:
+                T_NumJoint = sympy.Matrix([
+                    [1.,  0., 0., 0.],
+                    [0.,  0., 1., (theta[i])],
+                    [0., -1., 0., 0.],
+                    [0.,  0., 0., 1.]])
+            T.append(T_NumJoint)
+            if i ==0 :
+                T_dot.append(T_NumJoint)
+            else:
+                T_dot.append(T_dot[i-1] * T_NumJoint)
+            T_simplify.append(T_dot[i].xreplace({n : round(n, 6) for n in T_dot[i].atoms(sympy.Number)}))
+            T_joint.append(T_simplify[i] * base_pos)
+            # T_joint.append(T_simplify[i][ : ,0:3])
+            # np_joint = T_joint[i].subs([(theta1,0),(theta2,0),(theta3,3)])[0:3].T
+            np_joint = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6'
+                                      ,'theta7','theta8','theta9','theta10','theta11'),T_joint[i],"numpy")
+            point_joint[i+1] = np_joint(theta_rol[0],theta_rol[1],theta_rol[2],theta_rol[3],theta_rol[4]
+                                        ,theta_rol[5],theta_rol[6],theta_rol[7],theta_rol[8],theta_rol[9]
+                                        ,theta_rol[10])[0:3].T
+            # p.addUserDebugLine(point_joint[i], point_joint[i+1], lineColorRGB=[0,0,1], lineWidth=5)
+        # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0.5,0.3]], pointSize=12)
+        
+        return T_simplify
+    
     # def T_joint(self, theta=np.zeros(11)):
     #     T_joint[0] = np.array((1.0*(((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*cos(theta5) - 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*sin(theta5))*cos(theta6) - 1.0*(-1.0*(-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*sin(theta4) + 1.0*sin(theta2)*cos(theta1)*cos(theta4))*sin(theta6))*cos(theta8) + 1.0*(1.0*((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*sin(theta5) + 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*cos(theta5))*sin(theta8))
     #     T_joint[1] = np.array()
