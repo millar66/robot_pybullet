@@ -636,6 +636,7 @@ class DHParameter :
             else:
                 T_dot.append(T_dot[i-1] * T_NumJoint)
             T_simplify.append(T_dot[i].xreplace({n : round(n, 6) for n in T_dot[i].atoms(sympy.Number)}))
+            # T_simplify.append(T_dot[i])
             T_joint.append(T_simplify[i] * base_pos)
             # T_joint.append(T_simplify[i][ : ,0:3])
             # np_joint = T_joint[i].subs([(theta1,0),(theta2,0),(theta3,3)])[0:3].T
@@ -699,6 +700,7 @@ class DHParameter :
             else:
                 T_dot.append(T_dot[i-1] * T_NumJoint)
             T_simplify.append(T_dot[i].xreplace({n : round(n, 6) for n in T_dot[i].atoms(sympy.Number)}))
+            # T_simplify.append(T_dot[i])
             T_joint.append(T_simplify[i] * base_pos)
             # T_joint.append(T_simplify[i][ : ,0:3])
             # np_joint = T_joint[i].subs([(theta1,0),(theta2,0),(theta3,3)])[0:3].T

@@ -28,7 +28,9 @@ T_all = np.dot(T_roll, np.dot(T_pitch,T_yaw))
 
 
 # %%
-joint_T_all = DHParameter().func_dh_all(Joint_pos)
+joint_T_all = DHParameter().func_dh_all(theta_i)
+joint_T = DHParameter().func_dh(theta_i)
+end_pos_new = DHParameter().DH_compute(theta_i)
 
 d34 = 0.04951
 d3e = d34 * sympy.tan(theta4/2)
@@ -74,6 +76,7 @@ L5 = 0.36665
 L8 = 0.55443-0.16
 d78 = 0.04050
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0, 0, 0, 0, 0, 0]
+theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
 # theta_i = [0, 3.14159/3.8, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 # theta_i = [0, 0.7, 0.8, 2.3, -0.5, 0.3, -0.06, 0.5, 0.5, 0.5, 0.5]
 
@@ -92,12 +95,15 @@ end6_v = end6_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[
 
 end8_np = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), end8, "numpy")
 # end8_v = end8_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
-end8_v = end8_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-
+end8_v = end8_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5]+np.pi/2,theta_i[6],theta_i[7])
 end8_v = np.array([[ 0.29851418,  0.        ,  0.9544052 ,  0.26295908],
                    [ 0.        , -1.        ,  0.        ,  0.        ],
                    [ 0.9544052 ,  0.        , -0.29851418,  0.56263871],
                    [ 0.        ,  0.        ,  0.        ,  1.        ]])
+end8_v = np.array([[ 6.94454039e-01,  2.06981063e-16, -7.19537065e-01, -4.13329534e-01],
+                   [ 1.54421550e-16, -1.00000000e+00, -1.38620230e-16, -1.05227436e-16],
+                   [-7.19537065e-01, -1.48466495e-17, -6.94454039e-01, 4.74262818e-01],
+                   [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00]])
 
 end8_d = end8_v[0:3,3]
 end8_r = end8_v[0:3,0:3]
@@ -115,7 +121,7 @@ end0_d = np.dot(end8_v, np.array([[1, 0, 0, d78],[0, 1, 0, 0],[0, 0, 1, -L8],[0,
 # ds6e_v = ds6e_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
 
 # ds6 = sympy.Matrix([(joint_T_all[4][0,3]), (joint_T_all[4][1,3]), (joint_T_all[4][2,3])])
-ds6_v = end0_d[0:3,3]
+ds6_v = end0_d[0:3,3].reshape(3,1)
 # ds6_v = np.array([[-0.10139713],
 #                   [ 0.        ],
 #                   [ 0.71903507]])
@@ -138,7 +144,7 @@ thetaOd1 = np.arctan2(L3,d34)
 thetaOd2 = np.arctan2(L5,d34)
 theta42 = np.pi*2 - (np.pi*2-thetaO4) - thetaOd1 - thetaOd2
 theta41 = np.pi*2 - thetaO4 - thetaOd1 - thetaOd2
-print(thetaO4/np.pi*360/2,'\n',thetaOd1/np.pi/2*360,'\n',thetaOd2/np.pi/2*360,'\n',theta41/np.pi/2*360,'\n',theta42/np.pi/2*360)
+# print(thetaO4/np.pi*360/2,'\n',thetaOd1/np.pi/2*360,'\n',thetaOd2/np.pi/2*360,'\n',theta41/np.pi/2*360,'\n',theta42/np.pi/2*360)
 
 # %%
 # theta4_0 = np.pi - np.arccos(-(ds6w_v**2 - ds6e**2 - dew**2) / (2 * ds6e * dew))
@@ -167,6 +173,7 @@ u_sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
 u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],
                     [u_sw0[2], 0, -u_sw0[0]],
                     [-u_sw0[1], u_sw0[0], 0]])
+# u_sw0_x = u_sw0_x/np.linalg.norm(u_sw0_x)
 # R_sw_psi = I3 + u_sw0_x * sympy.sin(-psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(-psi))
 R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
 R_sw_psi.subs(psi, np.pi/30)
@@ -206,6 +213,7 @@ As = np.dot(u_sw0_x, R300)
 Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
 Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), R300)
 # Cs = np.dot(np.dot(u_sw0, u_sw0), R300)
+# psi = 1.5707
 psi = 0
 theta1_0 = np.arctan2((As[1,2]*np.sin(psi) + Bs[1,2]*np.cos(psi) + Cs[1,2]),(As[0,2]*np.sin(psi) + Bs[0,2]*np.cos(psi) + Cs[0,2]))
 theta2_0 = np.arccos(As[2,2]*np.sin(psi) + Bs[2,2]*np.cos(psi) + Cs[2,2])
@@ -213,6 +221,7 @@ theta3_0 = np.arctan2((As[2,1]*np.sin(psi) + Bs[2,1]*np.cos(psi) + Cs[2,1]),(-As
 theta_i_0 = theta_i.copy()
 theta_i_0[0:4] = [theta1_0, theta2_0, theta3_0, theta4_0]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
+print(theta1_0/6.28*360,'\n',theta2_0/6.28*360,'\n',theta3_0/6.28*360)
 
 # %%
 r40_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
@@ -220,9 +229,7 @@ r40_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],
 # r74_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
 # r84_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
 
-r43 = np.array([[np.cos(theta4_0), -np.sin(theta4_0), 0],
-                [0,                 0,               -1],
-                [np.sin(theta4_0),  np.cos(theta4_0), 0]])
+r43 = np.array([[np.cos(theta4_0), -np.sin(theta4_0), 0],[0,0,-1],[np.sin(theta4_0),  np.cos(theta4_0), 0]])
 
 # r60 = end6_v[0:3,0:3]
 r80 = end8_v[0:3,0:3]
@@ -231,22 +238,146 @@ Aw = np.dot(np.dot(r43.T, As.T),r80)
 Bw = np.dot(np.dot(r43.T, Bs.T),r80)
 Cw = np.dot(np.dot(r43.T, Cs.T),r80)
 
-theta5_0 = np.arctan2(Aw[2,2]*np.sin(psi) + Bs[2,2]*np.cos(psi) + Cs[2,2],-As[2,2]*np.sin(psi) - Bs[2,2]*np.cos(psi) - Cs[2,2])
-theta6_0 = np.arccos(Aw[1,2]*np.sin(psi) + Bw[1,2]*np.cos(psi) + Cw[1,2])
-theta8_0 = np.arctan2(Aw[1,1]*np.sin(psi) + Bs[1,1]*np.cos(psi) + Cs[1,1],-As[1,0]*np.sin(psi) - Bs[1,0]*np.cos(psi) - Cs[1,0])
+theta5_0 = np.arctan2(Aw[2,2]*np.sin(psi) + Bw[2,2]*np.cos(psi) + Cw[2,2],-Aw[0,2]*np.sin(psi) - Bw[0,2]*np.cos(psi) - Cw[0,2])
+theta6_0 = np.arccos(-Aw[1,2]*np.sin(psi) - Bw[1,2]*np.cos(psi) - Cw[1,2])
+theta8_0 = np.arctan2(Aw[1,1]*np.sin(psi) + Bw[1,1]*np.cos(psi) + Cw[1,1],-Aw[1,0]*np.sin(psi) - Bw[1,0]*np.cos(psi) - Cw[1,0])
+
+theta_i_0 = theta_i.copy()
+theta_i_0[0:6] = [theta1_0, theta2_0, theta3_0, theta4_0, theta5_0, theta6_0 - np.pi/2]
+theta_i_0[7] = theta8_0
+print(theta5_0/6.28*360,'\n',(theta6_0- np.pi/2)/6.28*360,'\n',theta8_0/6.28*360)
+print(theta_i[4]/6.28*360,'\n',theta_i[5]/6.28*360,'\n',theta_i[7]/6.28*360)
 
 # %%
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
+
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+# %%
 # log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/fixed_joint6.mp4")
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
 psi = 0
-for i in np.arange(0,np.pi,0.002):
-    psi=i
+# for i in np.arange(0,np.pi,0.0001):
+    # psi=i
+    
+run_x = -0.
+run_y = 0.
+run_z = 0.2
+end_roll = 0
+end_pitch = 0
+end_yaw = 0
+
+end_point_start = end8_v
+T_run = np.array([[1, 0, 0, run_x],
+                  [0, 1, 0, run_y],
+                  [0, 0, 1, run_z],
+                  [0, 0, 0, 1]])
+end_point_end = np.matmul(end_point_start, T_run)
+step_x = run_x / 480.
+step_y = run_y / 480.
+step_z = run_z / 480.
+
+T_step = np.array([[1, 0, 0, step_x],
+                   [0, 1, 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]])
+
+# end8_v = end_point_end
+end_point_k = end8_v.copy()
+end_pos_new = DHParameter().DH_compute(theta_i)
+end_pos_new_1 = end_pos_new
+
+# %%
+
+for i in range(200):
+    
+    # end_point_k[0,3] = end_point_k[0,3] + step_x
+    # end_point_k[1,3] = end_point_k[1,3] + step_y
+    end_point_k[2,3] = end_point_k[2,3] + step_z
+    
+    # end8_v = end_point_k
+    # end8_d = end8_v[0:3,3]
+    # end8_r = end8_v[0:3,0:3]
+    end0_d = np.dot(end_point_k, np.array([[1, 0, 0, d78],[0, 1, 0, 0],[0, 0, 1, -L8],[0, 0, 0, 1]]))
+    ds6_v = end0_d[0:3,3].reshape(3,1)
+
+    ds6w_v = np.linalg.norm(ds6_v - dw)
+
+    thetaO4 = np.arccos((dwo4**2 + dso4**2 - ds6w_v**2) / (2*dwo4*dso4))
+    # thetaOd1 = np.arctan2(L3,d34)
+    # thetaOd2 = np.arctan2(L5,d34)
+    # theta42 = np.pi*2 - (np.pi*2-thetaO4) - thetaOd1 - thetaOd2
+    theta41 = np.pi*2 - thetaO4 - thetaOd1 - thetaOd2
+
+    theta4_0 = theta41
+    # alpha1 = np.arctan2(d34,L3)
+    alpha2 = np.arccos((dwo4**2 + ds6w_v**2 - dso4**2) / (2 * dwo4 * ds6w_v))
+    alpha_0 = -alpha1 - alpha2
+
+    # I3 = np.eye(3)
+
+
+    u_sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
+    u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],[u_sw0[2], 0, -u_sw0[0]],[-u_sw0[1], u_sw0[0], 0]])
+    R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
+    R_sw_psi.subs(psi, np.pi/30)
+    sv0 = np.array([0, 0, 1])
+    sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
+
+    e_l = np.cross(sv0, sw0)
+    e_l0 = e_l/np.linalg.norm(e_l)
+
+    e_l_x = e_l0[0]
+    e_l_y = e_l0[1]
+    e_l_z = e_l0[2]
+
+    e_l_X = np.array([[0, -e_l_z, e_l_y],
+                      [e_l_z, 0, -e_l_x],
+                      [-e_l_y, e_l_x, 0]])
+
+    R_l_alpha = I3 + e_l_X * np.sin(alpha_0) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha_0))
+
+    d3e0 = d34 * np.tan(theta4_0/2)
+    dew0 = L3 + d3e0
+    se0 = dew0 * np.dot(R_l_alpha, sw0)
+
+    r30_v = r30_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
+
+
+    z300 = (se0/np.linalg.norm(se0))
+
+    y300 = e_l0
+    x300 = np.cross(y300, z300)
+    rt = np.array([[-1, 0, 0],[0, -1, 0],[0, 0, 1]])
+    R300 = np.dot(np.array([x300,y300,z300]).reshape(3,3),rt)
+
+    As = np.dot(u_sw0_x, R300)
+    Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
+    Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), R300)
+
     theta1_0 = np.arctan2((As[1,2]*np.sin(psi) + Bs[1,2]*np.cos(psi) + Cs[1,2]),(As[0,2]*np.sin(psi) + Bs[0,2]*np.cos(psi) + Cs[0,2]))
     theta2_0 = np.arccos(As[2,2]*np.sin(psi) + Bs[2,2]*np.cos(psi) + Cs[2,2])
     theta3_0 = np.arctan2((As[2,1]*np.sin(psi) + Bs[2,1]*np.cos(psi) + Cs[2,1]),(-As[2,0]*np.sin(psi) - Bs[2,0]*np.cos(psi) - Cs[2,0]))
+
+    # r80 = end8_v[0:3,0:3]
+    Aw = np.dot(np.dot(r43.T, As.T),r80)
+    Bw = np.dot(np.dot(r43.T, Bs.T),r80)
+    Cw = np.dot(np.dot(r43.T, Cs.T),r80)
+    theta5_0 = np.arctan2(Aw[2,2]*np.sin(psi) + Bw[2,2]*np.cos(psi) + Cw[2,2],-Aw[0,2]*np.sin(psi) - Bw[0,2]*np.cos(psi) - Cw[0,2])
+    theta6_0 = np.arccos(-Aw[1,2]*np.sin(psi) - Bw[1,2]*np.cos(psi) - Cw[1,2] - 0.000000000724056)
+    theta8_0 = np.arctan2(Aw[1,1]*np.sin(psi) + Bw[1,1]*np.cos(psi) + Cw[1,1],-Aw[1,0]*np.sin(psi) - Bw[1,0]*np.cos(psi) - Cw[1,0])
+
     theta_i_0 = theta_i.copy()
-    theta_i_0[0:4] = [theta1_0, theta2_0, theta3_0, theta4_0]
+    theta_i_0[0:6] = [theta1_0, theta2_0, theta3_0, theta4_0, theta5_0, theta6_0 - np.pi/2]
+    theta_i_0[7] = theta8_0
+
+    end_pos_new = DHParameter().DH_compute(theta_i_0)
+    p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
+    end_pos_new_1 = end_pos_new
+    
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
     sleep(1./240.)
+    
+# %%
 for i in np.arange(np.pi,0,-0.002):
     psi=i
     theta1_0 = np.arctan2((As[1,2]*np.sin(psi) + Bs[1,2]*np.cos(psi) + Cs[1,2]),(As[0,2]*np.sin(psi) + Bs[0,2]*np.cos(psi) + Cs[0,2]))
@@ -281,7 +412,7 @@ for i in np.arange(np.pi,0,-0.002):
 
 p.removeAllUserDebugItems()
 
-# p.addUserDebugLine([0, 0, 0], [1, 0, 0], lineColorRGB=[1,0,0], lineWidth=5)
+p.addUserDebugLine([0, 0, 0], [1, 0, 0], lineColorRGB=[1,0,0], lineWidth=5)
 p.addUserDebugLine([0, 0, 0], [0, 1, 0], lineColorRGB=[0,1,0], lineWidth=5)
 p.addUserDebugLine([0, 0, 0], [0, 0, 1], lineColorRGB=[0,1,0], lineWidth=5)
 
