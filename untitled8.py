@@ -110,14 +110,54 @@ end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
                       [ 0.        , -1.        , -0.        ,  0.22222222],
                       [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
                       [ 0.        ,  0.        ,  0.        ,  1.        ]])
-end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
-                      [ 0.        , -1.        , -0.        ,  0.22222222],
-                      [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
+end_point = np.array([[-0.64029595, -0.76779092,  0.02276398, -0.11186384],
+                      [-0.58731913,  0.50846206,  0.62970038,  0.49846492],
+                      [-0.49505286,  0.38982488, -0.77650449,  0.43479268],
                       [ 0.        ,  0.        ,  0.        ,  1.        ]])
 
 end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
 end0_d = np.dot(end_point, end_bias)
 # ds6_r = np.dot(end0_d[0:3,0:3], np.array([[1, 0, 0],[0, 0, -1],[0, 1, 0]]))
+
+# %% test
+end_pos_new = np.array([[-0.64029595, -0.76779092,  0.02276398, -0.11186384],
+                        [-0.58731913,  0.50846206,  0.62970038,  0.49846492],
+                        [-0.49505286,  0.38982488, -0.77650449,  0.43479268],
+                        [ 0.        ,  0.        ,  0.        ,  1.        ]])
+
+aa = np.dot(end_pos_new, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
+bb = np.dot(aa, [[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+cc = np.dot(aa, [[1, 0, 0, 0], [0, 1, 0, -0.04050], [0, 0, 1, 0], [0, 0, 0, 1]])
+# p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+p.addUserDebugPoints(pointPositions=[aa[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
+p.addUserDebugPoints(pointPositions=[bb[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
+p.addUserDebugPoints(pointPositions=[cc[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
+
+T8 = np.array([[np.cos(theta_i[7]),np.sin(theta_i[7]),0,0],
+              [-np.sin(theta_i[7]),np.cos(theta_i[7]),0,0],
+              [0, 0, 1,0],
+              [0, 0, 0, 1]])
+np.dot(cc,T8)
+
+z8 = end_pos_new[0:3,3] - aa[0:3,3]
+z8_1 = z8/np.linalg.norm(z8)
+l8 = z8/np.linalg.norm(z8)
+# l8 = np.cross(sv0, sw0)
+# e_l[2] = e_l[2] + L1
+# e_l0 = e_l/np.linalg.norm(e_l)
+# e_l0[2] = e_l0[2]
+# e_l0 = np.array([0, 1, 0])
+l8_x = l8[0]
+l8_y = l8[1]
+l8_z = l8[2]
+l8_X = np.array([[0, -l8_z, l8_y],
+                 [l8_z, 0, -l8_x],
+                 [-l8_y, l8_x, 0]])
+l8_t = I3 + l8_X * np.sin(-theta_i[7]) + np.dot(l8_X, l8_X) * (1 - np.cos(-theta_i[7]))
+
+dd = np.dot(l8_t,(bb[0:3,3]-aa[0:3,3]).T) + aa[0:3,3]
+p.addUserDebugPoints(pointPositions=[dd], pointColorsRGB=[[0.5,0.2,1]], pointSize=10)
+
 
 # %%
 # d3e = d34 * sympy.tan(theta4/2)
@@ -352,9 +392,9 @@ psi = 0
 # for i in np.arange(0,np.pi,0.0001):
     # psi=i
     
-run_x = 0.2
-run_y = -0.4
-run_z = 0.2
+run_x = 0.3
+run_y = 0.
+run_z = 0.
 end_roll = 0
 end_pitch = 0
 end_yaw = 0
@@ -367,6 +407,10 @@ T_roll = np.array([[1, 0, 0, 0],
                    [0, 1, 0, 0],
                    [0, 0, 1, 0],
                    [0, 0, 0, 1]])
+# T8 = np.array([[np.cos(theta_i[7]),np.sin(theta_i[7]),0,0],
+#               [-np.sin(theta_i[7]),np.cos(theta_i[7]),0,0],
+#               [0, 0, 1,0],
+#               [0, 0, 0, 1]])
 # end_point_end = np.matmul(end_point_start, T_run)
 step_x = run_x / 180.
 step_y = run_y / 180.
@@ -387,142 +431,180 @@ ds6_v_1 = ds6_v
 # %%
 # log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/analysis_z.mp4")
 
-for i in range(0):
+for i in range(100):
     
     end_point_k[0,3] = end_point_k[0,3] + step_x
     end_point_k[1,3] = end_point_k[1,3] + step_y
     end_point_k[2,3] = end_point_k[2,3] + step_z
-    end0_d = np.dot(end_point_k, end_bias)
+    # end0_d = np.dot(end_point_k, end_bias)
 
-    ds6_v = end0_d[0:3,3].reshape(3,1)
-    p.addUserDebugPoints(pointPositions=[end0_d[0:3,3]], pointColorsRGB=[[1,0,1]], pointSize=3)
-    # ds6_v = np.array([[end_point_k[0,3] + 0.01125], [end_point_k[1,3]], [end_point_k[2,3] - 0.55443 + 0.16]])
-
-    ds6w_v = np.linalg.norm(ds6_v - dw)
-
-    thetaO4 = np.arccos((dwo4**2 + dso4**2 - ds6w_v**2) / (2*dwo4*dso4))
-    # thetaOd1 = np.arctan2(L3,d34)
-    # thetaOd2 = np.arctan2(L5,d34)
-    # theta42 = np.pi*2 - (np.pi*2-thetaO4) - thetaOd1 - thetaOd2
-    theta41 = np.pi*2 - thetaO4 - thetaOd1 - thetaOd2
-
-    theta4_0 = theta41
-    # alpha1 = np.arctan2(d34,L3)
-    alpha2 = np.arccos((dwo4**2 + ds6w_v**2 - dso4**2) / (2 * dwo4 * ds6w_v))
-    alpha_0 = -alpha1 - alpha2
-
-    # I3 = np.eye(3)
-    # u_sw0 = (ds6-dw)/(ds6-dw).norm()
-    u_sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
-    u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],
-                        [u_sw0[2], 0, -u_sw0[0]],
-                        [-u_sw0[1], u_sw0[0], 0]])
-    # u_sw0_x = u_sw0_x/np.linalg.norm(u_sw0_x)
-    # R_sw_psi = I3 + u_sw0_x * sympy.sin(-psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(-psi))
-    # R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
-    # R_sw_psi.subs(psi, np.pi/30)
-    sv0 = np.array([0, 0, 1])
-    sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
+    aa = np.dot(end_point_k, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
+    bb = np.dot(aa, [[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    z8 = end_point_k[0:3,3] - aa[0:3,3]
+    # p.addUserDebugPoints(pointPositions=[aa[0:3,3]], pointColorsRGB=[[0.3,1,0]], pointSize=8)
+    # p.addUserDebugPoints(pointPositions=[end_point_k[0:3,3]], pointColorsRGB=[[0.3,1,0]], pointSize=8)
+    l8 = z8/np.linalg.norm(z8)
+    # p.addUserDebugLine(z8, end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+    l8_x = l8[0]
+    l8_y = l8[1]
+    l8_z = l8[2]
+    l8_X = np.array([[0, -l8_z, l8_y],
+                     [l8_z, 0, -l8_x],
+                     [-l8_y, l8_x, 0]])
     
-    e_l = np.cross(sv0, sw0)
-    # e_l[2] = e_l[2] + L1
-    e_l0 = e_l/np.linalg.norm(e_l)
-    # e_l0[2] = e_l0[2]
-    # e_l0 = np.array([0, 1, 0])
-    e_l_x = e_l0[0]
-    e_l_y = e_l0[1]
-    e_l_z = e_l0[2]
+    for j in np.arange(0,np.pi*2,np.pi/10000):
+        # p.addUserDebugPoints(pointPositions=[aa[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
+        # p.addUserDebugPoints(pointPositions=[bb[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
+        l8_t = I3 + l8_X * np.sin(-j) + np.dot(l8_X, l8_X) * (1 - np.cos(-j))
+        ds6_v = (np.dot(l8_t,(bb[0:3,3]-aa[0:3,3]).T) + aa[0:3,3]).reshape(3,1)
+        
+        # ds6_v = end0_d[0:3,3].reshape(3,1)
+        # p.addUserDebugPoints(pointPositions=[ds6_v.reshape(3)], pointColorsRGB=[[1,0,1]], pointSize=8)
+        # ds6_v = np.array([[end_point_k[0,3] + 0.01125], [end_point_k[1,3]], [end_point_k[2,3] - 0.55443 + 0.16]])
     
-    e_l_X = np.array([[0, -e_l_z, e_l_y],
-                      [e_l_z, 0, -e_l_x],
-                      [-e_l_y, e_l_x, 0]])
+        ds6w_v = np.linalg.norm(ds6_v - dw)
+        
+        thetao4err = (dwo4**2 + dso4**2 - ds6w_v**2) / (2*dwo4*dso4)
+        # if -1 <= thetao4err <= 1:
+        #     thetaO4 = np.arccos((dwo4**2 + dso4**2 - ds6w_v**2) / (2*dwo4*dso4))
+        # else:
+        #     continue
+        # thetaOd1 = np.arctan2(L3,d34)
+        # thetaOd2 = np.arctan2(L5,d34)
+        # theta42 = np.pi*2 - (np.pi*2-thetaO4) - thetaOd1 - thetaOd2
+        theta41 = np.pi*2 - thetaO4 - thetaOd1 - thetaOd2
     
-    R_l_alpha = I3 + e_l_X * np.sin(alpha_0) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha_0))
+        theta4_0 = theta41
+        # alpha1 = np.arctan2(d34,L3)
+        alpha2err = (dwo4**2 + ds6w_v**2 - dso4**2) / (2 * dwo4 * ds6w_v)
+        # if -1 <= thetao4err <= 1:
+        #     alpha2 = np.arccos((dwo4**2 + ds6w_v**2 - dso4**2) / (2 * dwo4 * ds6w_v))
+        # else:
+        #     continue
+        alpha_0 = -alpha1 - alpha2
     
-    d3e0 = d34 * np.tan(theta4_0/2)
-    dew0 = L3 + d3e0
-    se0 = dew0 * np.dot(R_l_alpha, sw0)
+        # I3 = np.eye(3)
+        # u_sw0 = (ds6-dw)/(ds6-dw).norm()
+        u_sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
+        u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],
+                            [u_sw0[2], 0, -u_sw0[0]],
+                            [-u_sw0[1], u_sw0[0], 0]])
+        # u_sw0_x = u_sw0_x/np.linalg.norm(u_sw0_x)
+        # R_sw_psi = I3 + u_sw0_x * sympy.sin(-psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(-psi))
+        # R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
+        # R_sw_psi.subs(psi, np.pi/30)
+        sv0 = np.array([0, 0, 1])
+        sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
+        
+        e_l = np.cross(sv0, sw0)
+        # e_l[2] = e_l[2] + L1
+        e_l0 = e_l/np.linalg.norm(e_l)
+        # e_l0[2] = e_l0[2]
+        # e_l0 = np.array([0, 1, 0])
+        e_l_x = e_l0[0]
+        e_l_y = e_l0[1]
+        e_l_z = e_l0[2]
+        
+        e_l_X = np.array([[0, -e_l_z, e_l_y],
+                          [e_l_z, 0, -e_l_x],
+                          [-e_l_y, e_l_x, 0]])
+        
+        R_l_alpha = I3 + e_l_X * np.sin(alpha_0) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha_0))
+        
+        d3e0 = d34 * np.tan(theta4_0/2)
+        dew0 = L3 + d3e0
+        se0 = dew0 * np.dot(R_l_alpha, sw0)
+        
+        r30_v = r30_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
+        # array([[ 0.67728209, -0.        ,  0.73572344],
+        #        [ 0.        ,  1.        ,  0.        ],
+        #        [-0.73572344,  0.        ,  0.67728209]
+        
+        # z300 = (se0/np.linalg.norm(se0))
+        # # y300 = -np.sign(np.sin(theta4_0)) * e_l0
+        # y300 = e_l0
+        # x300 = np.cross(y300, z300)
+        z300 = (se0/np.linalg.norm(se0))
+        x30 = z300[0]
+        y30 = z300[1]
+        z30 = z300[2]
+        alpha13 = -np.arctan2(np.sqrt(x30**2+y30**2),z30)
+        # sv13 = np.array([0, 0, 1])
+        # e_l13 = np.cross(se0, sv13)
+        # e_l130 = e_l13/np.linalg.norm(e_l13)
+        # q1 = np.quaternion(1,2,3,4)
+        # q2 = quaternion.from_float_array([1,2,3,4])
+        # q3 = quaternion.from_rotation_matrix([[1,2,3],[1,2,3],[1,2,3]])
+        # q4 = quaternion.from_euler_angles([1,2,3])
+        # print(q1,q2,q3,q4)
+        # e_l_x13 = e_l130[0]
+        # e_l_y13 = e_l130[1]
+        # e_l_z13 = e_l130[2]
+        # e_l_X13 = np.array([[0, -e_l_z13, e_l_y13],
+        #                     [e_l_z13, 0, -e_l_x13],
+        #                     [-e_l_y13, e_l_x13, 0]])
+        # R3001 = (I3 + e_l_X13 * np.sin(alpha13) + np.dot(e_l_X13, e_l_X13) * (1 - np.cos(alpha13)))
+        R3001 = (I3 + e_l_X * np.sin(alpha13) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha13))).T
+        y13 = np.dot([0, 1, 0],R3001)
+        y13_5 = np.linalg.norm(e_l0-y13)
+        alphay13 = np.arccos((2-y13_5**2)/2)
+        e_l_Xy13 = np.array([[0, -z30, y30],
+                             [z30, 0, -x30],
+                             [-y30, x30, 0]])
+        R3002 = (I3 + e_l_Xy13 * np.sin(alphay13) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(alphay13))).T
+        R3003 = np.dot(R3001,R3002).T
+        # R300 = R3001
+        # p.addUserDebugLine([y13[0],y13[1],y13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+        # yyy = np.dot(y13,R3002)
+        # p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.8], lineWidth=5)
+        
+        # for i in np.arange(0,np.pi*2,np.pi/12):
+        #     r3002 = (I3 + e_l_Xy13 * np.sin(i) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(i)))
+        #     yyy = np.dot(r3002,y13)
+        #     p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[0.3,0.8,0.8], lineWidth=5)
+        #     sleep(1.)
+        
+        # np.dot(R300,[0, 1, 0])
+        # xyz13 = np.dot([0, 0, 1],R3001)
+        # p.addUserDebugLine([xyz13[0],xyz13[1],xyz13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+        
+        rz13 = np.array([[-1,0,0],[0,-1,0],[0,0,1]])
+        R300 = np.dot(R3003,rz13)
     
-    r30_v = r30_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-    # array([[ 0.67728209, -0.        ,  0.73572344],
-    #        [ 0.        ,  1.        ,  0.        ],
-    #        [-0.73572344,  0.        ,  0.67728209]
+        As = np.dot(u_sw0_x, R300)
+        Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
+        Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), R300)
     
-    # z300 = (se0/np.linalg.norm(se0))
-    # # y300 = -np.sign(np.sin(theta4_0)) * e_l0
-    # y300 = e_l0
-    # x300 = np.cross(y300, z300)
-    z300 = (se0/np.linalg.norm(se0))
-    x30 = z300[0]
-    y30 = z300[1]
-    z30 = z300[2]
-    alpha13 = -np.arctan2(np.sqrt(x30**2+y30**2),z30)
-    # sv13 = np.array([0, 0, 1])
-    # e_l13 = np.cross(se0, sv13)
-    # e_l130 = e_l13/np.linalg.norm(e_l13)
-    # q1 = np.quaternion(1,2,3,4)
-    # q2 = quaternion.from_float_array([1,2,3,4])
-    # q3 = quaternion.from_rotation_matrix([[1,2,3],[1,2,3],[1,2,3]])
-    # q4 = quaternion.from_euler_angles([1,2,3])
-    # print(q1,q2,q3,q4)
-    # e_l_x13 = e_l130[0]
-    # e_l_y13 = e_l130[1]
-    # e_l_z13 = e_l130[2]
-    # e_l_X13 = np.array([[0, -e_l_z13, e_l_y13],
-    #                     [e_l_z13, 0, -e_l_x13],
-    #                     [-e_l_y13, e_l_x13, 0]])
-    # R3001 = (I3 + e_l_X13 * np.sin(alpha13) + np.dot(e_l_X13, e_l_X13) * (1 - np.cos(alpha13)))
-    R3001 = (I3 + e_l_X * np.sin(alpha13) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha13))).T
-    y13 = np.dot([0, 1, 0],R3001)
-    y13_5 = np.linalg.norm(e_l0-y13)
-    alphay13 = np.arccos((2-y13_5**2)/2)
-    e_l_Xy13 = np.array([[0, -z30, y30],
-                         [z30, 0, -x30],
-                         [-y30, x30, 0]])
-    R3002 = (I3 + e_l_Xy13 * np.sin(alphay13) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(alphay13))).T
-    R3003 = np.dot(R3001,R3002).T
-    # R300 = R3001
-    # p.addUserDebugLine([y13[0],y13[1],y13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
-    # yyy = np.dot(y13,R3002)
-    # p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.8], lineWidth=5)
+        theta1_0 = np.arctan2((As[1,2]*np.sin(psi) + Bs[1,2]*np.cos(psi) + Cs[1,2]),(As[0,2]*np.sin(psi) + Bs[0,2]*np.cos(psi) + Cs[0,2]))
+        theta2_0 = np.arccos(As[2,2]*np.sin(psi) + Bs[2,2]*np.cos(psi) + Cs[2,2])
+        theta3_0 = np.arctan2((As[2,1]*np.sin(psi) + Bs[2,1]*np.cos(psi) + Cs[2,1]),(-As[2,0]*np.sin(psi) - Bs[2,0]*np.cos(psi) - Cs[2,0]))
     
-    # for i in np.arange(0,np.pi*2,np.pi/12):
-    #     r3002 = (I3 + e_l_Xy13 * np.sin(i) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(i)))
-    #     yyy = np.dot(r3002,y13)
-    #     p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[0.3,0.8,0.8], lineWidth=5)
-    #     sleep(1.)
+        r43 = np.array([[np.cos(theta4_0), -np.sin(theta4_0), 0],[0,0,-1],[np.sin(theta4_0),  np.cos(theta4_0), 0]])
+        r80 = end8_v[0:3,0:3]
+        Aw = np.dot(np.dot(r43.T, As.T),r80)
+        Bw = np.dot(np.dot(r43.T, Bs.T),r80)
+        Cw = np.dot(np.dot(r43.T, Cs.T),r80)
+        theta8_0 = np.arctan2(Aw[1,1]*np.sin(psi) + Bw[1,1]*np.cos(psi) + Cw[1,1],-Aw[1,0]*np.sin(psi) - Bw[1,0]*np.cos(psi) - Cw[1,0])
+        # print('*'*20,'\n',theta8_0,'\n',theta_i[7])
+        theta5_0 = np.arctan2(Aw[2,2]*np.sin(psi) + Bw[2,2]*np.cos(psi) + Cw[2,2],-Aw[0,2]*np.sin(psi) - Bw[0,2]*np.cos(psi) - Cw[0,2])
+        theta6_0 = np.arccos(-Aw[1,2]*np.sin(psi) - Bw[1,2]*np.cos(psi) - Cw[1,2])
     
-    # np.dot(R300,[0, 1, 0])
-    # xyz13 = np.dot([0, 0, 1],R3001)
-    # p.addUserDebugLine([xyz13[0],xyz13[1],xyz13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+        theta_i_0 = theta_i.copy()
+        theta_i_0[0:6] = [theta1_0, theta2_0, theta3_0, theta4_0, theta5_0, theta6_0 - np.pi/2]
+        theta_i_0[7] = theta8_0
     
-    rz13 = np.array([[-1,0,0],[0,-1,0],[0,0,1]])
-    R300 = np.dot(R3003,rz13)
+        end_pos_new = DHParameter().DH_compute(theta_i_0)
+        # print(j)
+        if np.abs(np.linalg.norm(end_point_k[0:3,3]) - np.linalg.norm(end_pos_new[0:3,3])) < 0.005 \
+            and np.abs(np.linalg.norm(end_point_k[0:3,0:3]) - np.linalg.norm(end_pos_new[0:3,0:3])) < 0.01:
+            break
+        if j > np.pi*2-0.001:
+            print('*'*20,i)
 
-    As = np.dot(u_sw0_x, R300)
-    Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
-    Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), R300)
-
-    theta1_0 = np.arctan2((As[1,2]*np.sin(psi) + Bs[1,2]*np.cos(psi) + Cs[1,2]),(As[0,2]*np.sin(psi) + Bs[0,2]*np.cos(psi) + Cs[0,2]))
-    theta2_0 = np.arccos(As[2,2]*np.sin(psi) + Bs[2,2]*np.cos(psi) + Cs[2,2])
-    theta3_0 = np.arctan2((As[2,1]*np.sin(psi) + Bs[2,1]*np.cos(psi) + Cs[2,1]),(-As[2,0]*np.sin(psi) - Bs[2,0]*np.cos(psi) - Cs[2,0]))
-
-    r43 = np.array([[np.cos(theta4_0), -np.sin(theta4_0), 0],[0,0,-1],[np.sin(theta4_0),  np.cos(theta4_0), 0]])
-    r80 = end8_v[0:3,0:3]
-    Aw = np.dot(np.dot(r43.T, As.T),r80)
-    Bw = np.dot(np.dot(r43.T, Bs.T),r80)
-    Cw = np.dot(np.dot(r43.T, Cs.T),r80)
-    theta5_0 = np.arctan2(Aw[2,2]*np.sin(psi) + Bw[2,2]*np.cos(psi) + Cw[2,2],-Aw[0,2]*np.sin(psi) - Bw[0,2]*np.cos(psi) - Cw[0,2])
-    theta6_0 = np.arccos(-Aw[1,2]*np.sin(psi) - Bw[1,2]*np.cos(psi) - Cw[1,2])
-    theta8_0 = np.arctan2(Aw[1,1]*np.sin(psi) + Bw[1,1]*np.cos(psi) + Cw[1,1],-Aw[1,0]*np.sin(psi) - Bw[1,0]*np.cos(psi) - Cw[1,0])
-
-    theta_i_0 = theta_i.copy()
-    theta_i_0[0:6] = [theta1_0, theta2_0, theta3_0, theta4_0, theta5_0, theta6_0 - np.pi/2]
-    theta_i_0[7] = theta8_0
-
-    end_pos_new = DHParameter().DH_compute(theta_i_0)
-    p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
-    p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+    # p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
+    # p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+    p.addUserDebugPoints(pointPositions=[end_pos_new[0:3,3]], pointColorsRGB=[[0.5,0,0.3]], pointSize=3)
+    p.addUserDebugPoints(pointPositions=[end_point_k[0:3,3]], pointColorsRGB=[[0.1,0.5,0.2]], pointSize=3)
     # p.addUserDebugLine(ds6_v, ds6_v_1, lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
     end_pos_new_1 = end_pos_new
     # end_point_k_1 = end_point_k

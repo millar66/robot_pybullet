@@ -25,7 +25,7 @@ T_yaw = np.array([[orn_cos_z, orn_sin_z*-1, 0, 0],
                   [0,            0,               0, 1]])
 
 T_all = np.dot(T_roll, np.dot(T_pitch,T_yaw))
-
+# theta_i = [-1.1, 0.45272920, 1.142726-1.1, 1.909714, -0.35656702, 0.4630274, 0, 1.2834317, 0, 0, 0]
 
 # %%
 joint_T_all = DHParameter().func_dh8_all(theta_i)
@@ -77,6 +77,8 @@ L8 = 0.55443-0.16
 d78 = 0.04050
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0, 0, 0, 0, 0, 0]
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
+theta_i = [-1.14272, 0.452729, 0.0, 1.909714728, -0.325663, 0.491105, 0, 1.1958022, 0, 0, 0]
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
 # theta_i = [0.0, 0.8043512, -0.4094627, 2.08250059, -0.000558530805, 0.52248341, 0, -0.40918375, 0, 0, 0]
 # theta_i = [0, 3.14159/3.8, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 # theta_i = [0, 0.7, 0.8, 2.3, -0.5, 0.3, -0.06, 0.5, 0.5, 0.5, 0.5]
@@ -84,8 +86,7 @@ theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
 ds6 = sympy.Matrix([(joint_T_all[4][0,3]), (joint_T_all[4][1,3]), (joint_T_all[4][2,3])])
 
 ds6_np = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','theta7','theta8'), ds6, "numpy")
-ds6_v = ds6_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+ds6_v_s = ds6_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
 
 # %%
 end6 = joint_T_all[5]
@@ -106,13 +107,13 @@ end8_v = end8_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[
 #                    [-7.19537065e-01, -1.48466495e-17, -6.94454039e-01, 4.74262818e-01],
 #                    [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00]])
 end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
-                      [ 0.        , -1.        , -0.        , -1.05227436e-16],
+                      [ 0.        , -1.        , -0.        ,  0.22222222],
                       [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
                       [ 0.        ,  0.        ,  0.        ,  1.        ]])
-# end_point = np.array([[ 6.94454040e-01,  0.00000000e+00, -7.19537060e-01, -4.13329534e-01],
-#                       [ 0.00000000e+00, -1.00000000e+00, -0.00000000e+00, -1.05227436e-16],
-#                       [-7.19537060e-01,  0.00000000e+00, -6.94454040e-01, 5.57596151e-01],
-#                       [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00]])
+end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
+                      [ 0.        , -1.        , -0.        ,  0.22222222],
+                      [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
+                      [ 0.        ,  0.        ,  0.        ,  1.        ]])
 
 end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
 end0_d = np.dot(end_point, end_bias)
@@ -173,6 +174,7 @@ alpha_0 = -alpha1 - alpha2
 # theta4_0 = np.array(theta4_0).astype(float)
 # alpha_0 = np.array(alpha_0).astype(float)
 
+# alpha_0 = -np.arccos(np.sqrt(0.20176883**2+0.44219705**2) / 0.87392855)
 # psi = sympy.symbols('psi')
 I3 = np.eye(3)
 
@@ -183,13 +185,15 @@ u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],
                     [-u_sw0[1], u_sw0[0], 0]])
 # u_sw0_x = u_sw0_x/np.linalg.norm(u_sw0_x)
 # R_sw_psi = I3 + u_sw0_x * sympy.sin(-psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(-psi))
-R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
-R_sw_psi.subs(psi, np.pi/30)
+# R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
+# R_sw_psi.subs(psi, np.pi/30)
 sv0 = np.array([0, 0, 1])
 sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
 
 e_l = np.cross(sv0, sw0)
+# e_l[2] = e_l[2] + L1
 e_l0 = e_l/np.linalg.norm(e_l)
+# e_l0[2] = e_l0[2]
 # e_l0 = np.array([0, 1, 0])
 e_l_x = e_l0[0]
 e_l_y = e_l0[1]
@@ -210,16 +214,97 @@ r30_v = r30_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5]
 #        [ 0.        ,  1.        ,  0.        ],
 #        [-0.73572344,  0.        ,  0.67728209]
 
+# z300 = (se0/np.linalg.norm(se0))
+# # y300 = -np.sign(np.sin(theta4_0)) * e_l0
+# y300 = e_l0
+# x300 = np.cross(y300, z300)
 z300 = (se0/np.linalg.norm(se0))
-# y300 = -np.sign(np.sin(theta4_0)) * e_l0
-y300 = e_l0
-x300 = np.cross(y300, z300)
-rt = np.array([[-1, 0, 0],[0, -1, 0],[0, 0, 1]])
-R300 = np.dot(np.array([x300,y300,z300]).reshape(3,3),rt)
+x30 = z300[0]
+y30 = z300[1]
+z30 = z300[2]
+alpha13 = -np.arctan2(np.sqrt(x30**2+y30**2),z30)
+# sv13 = np.array([0, 0, 1])
+# e_l13 = np.cross(se0, sv13)
+# e_l130 = e_l13/np.linalg.norm(e_l13)
+# q1 = np.quaternion(1,2,3,4)
+# q2 = quaternion.from_float_array([1,2,3,4])
+# q3 = quaternion.from_rotation_matrix([[1,2,3],[1,2,3],[1,2,3]])
+# q4 = quaternion.from_euler_angles([1,2,3])
+# print(q1,q2,q3,q4)
+# e_l_x13 = e_l130[0]
+# e_l_y13 = e_l130[1]
+# e_l_z13 = e_l130[2]
+# e_l_X13 = np.array([[0, -e_l_z13, e_l_y13],
+#                     [e_l_z13, 0, -e_l_x13],
+#                     [-e_l_y13, e_l_x13, 0]])
+# R3001 = (I3 + e_l_X13 * np.sin(alpha13) + np.dot(e_l_X13, e_l_X13) * (1 - np.cos(alpha13)))
+R3001 = (I3 + e_l_X * np.sin(alpha13) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha13))).T
+y13 = np.dot([0, 1, 0],R3001)
+y13_5 = np.linalg.norm(e_l0-y13)
+alphay13 = np.arccos((2-y13_5**2)/2)
+e_l_Xy13 = np.array([[0, -z30, y30],
+                     [z30, 0, -x30],
+                     [-y30, x30, 0]])
+R3002 = (I3 + e_l_Xy13 * np.sin(alphay13) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(alphay13))).T
+R3003 = np.dot(R3001,R3002).T
+# R300 = R3001
+# p.addUserDebugLine([y13[0],y13[1],y13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+# yyy = np.dot(y13,R3002)
+# p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.8], lineWidth=5)
+
+# for i in np.arange(0,np.pi*2,np.pi/12):
+#     r3002 = (I3 + e_l_Xy13 * np.sin(i) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(i)))
+#     yyy = np.dot(r3002,y13)
+#     p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[0.3,0.8,0.8], lineWidth=5)
+#     sleep(1.)
+
+# np.dot(R300,[0, 1, 0])
+# xyz13 = np.dot([0, 0, 1],R3001)
+# p.addUserDebugLine([xyz13[0],xyz13[1],xyz13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+
+rz13 = np.array([[-1,0,0],[0,-1,0],[0,0,1]])
+R300 = np.dot(R3003,rz13)
+
+
+
+# r13x = np.dot([1,0,0],r30_v[0:3,0:3])
+# r13y = np.dot([0,1,0],r30_v[0:3,0:3])
+# r13z = np.dot([0,0,1],r30_v[0:3,0:3])
+# p.addUserDebugLine([r13x[0],r13x[1],r13x[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r13y[0],r13y[1],r13y[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r13z[0],r13z[1],r13z[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+
+# r31x = np.dot(r30_v[0:3,0:3],[1,0,0])
+# r31y = np.dot(r30_v[0:3,0:3],[0,1,0])
+# r31z = np.dot(r30_v[0:3,0:3],[0,0,1])
+# p.addUserDebugLine([r31x[0],r31x[1],r31x[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r31y[0],r31y[1],r31y[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r31z[0],r31z[1],r31z[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+
+# r113x = np.dot([1,0,0],R3002)
+# r113y = np.dot([0,1,0],R3002)
+# r113z = np.dot([0,0,1],R3002)
+# p.addUserDebugLine([r31x[0],r31x[1],r31x[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r31y[0],r31y[1],r31y[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+# p.addUserDebugLine([r31z[0],r31z[1],r31z[2]+L1], [0, 0, L1], lineColorRGB=[0.2,0.8,0.], lineWidth=5)
+
+
+# r30z = np.arcsin(np.sqrt(x30**2+y30**2)/z30)
+# r30x = np.arcsin(np.sqrt(y30**2+z30**2)/x30)
+# z300 = (se0/np.linalg.norm(se0))
+# y300 = e_l0
+# x300 = np.cross(y300, z300)
+# rt = np.array([[-1, 0, 0],[0, -1, 0],[0, 0, 1]])
+# R300 = np.dot(np.array([x300,y300,z300]).reshape(3,3),rt)
 
 As = np.dot(u_sw0_x, R300)
 Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
 Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), R300)
+Bs[2,1] = 0
+Cs[0:3,1] = 0
+# As = np.dot(u_sw0_x, r30_v[0:3,0:3])
+# Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), r30_v[0:3,0:3])
+# Cs = np.dot(np.dot(u_sw0.reshape(3,1), u_sw0.reshape(1,3)), r30_v[0:3,0:3])
 # Cs = np.dot(np.dot(u_sw0, u_sw0), R300)
 # psi = 1.5707
 psi = 0
@@ -230,7 +315,7 @@ theta_i_0 = theta_i.copy()
 theta_i_0[0:4] = [theta1_0, theta2_0, theta3_0, theta4_0]
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
 print(theta1_0/6.28*360,'\n',theta2_0/6.28*360,'\n',theta3_0/6.28*360)
-
+print(theta_i[0]/6.28*360,'\n',theta_i[1]/6.28*360,'\n',theta_i[2]/6.28*360)
 # %%
 r40_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
 # r64_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
@@ -267,19 +352,22 @@ psi = 0
 # for i in np.arange(0,np.pi,0.0001):
     # psi=i
     
-run_x = -0.
-run_y = 0.
-run_z = 0.2
+run_x = -0.3
+run_y = 0.1
+run_z = 0.1
 end_roll = 0
 end_pitch = 0
 end_yaw = 0
 
 end_point_start = end8_v
-T_run = np.array([[1, 0, 0, run_x],
-                  [0, 1, 0, run_y],
-                  [0, 0, 1, run_z],
-                  [0, 0, 0, 1]])
-end_point_end = np.matmul(end_point_start, T_run)
+
+roll = np.pi
+roll_step = roll / 420
+T_roll = np.array([[1, 0, 0, 0],
+                   [0, 1, 0, 0],
+                   [0, 0, 1, 0],
+                   [0, 0, 0, 1]])
+# end_point_end = np.matmul(end_point_start, T_run)
 step_x = run_x / 180.
 step_y = run_y / 180.
 step_z = run_z / 180.
@@ -297,9 +385,9 @@ end_point_k_1 = end_point_k.copy()
 ds6_v_1 = ds6_v
 
 # %%
-log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/analysis_z.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/analysis_z.mp4")
 
-for i in range(200):
+for i in range(100):
     
     end_point_k[0,3] = end_point_k[0,3] + step_x
     end_point_k[1,3] = end_point_k[1,3] + step_y
@@ -307,6 +395,7 @@ for i in range(200):
     end0_d = np.dot(end_point_k, end_bias)
 
     ds6_v = end0_d[0:3,3].reshape(3,1)
+    p.addUserDebugPoints(pointPositions=[end0_d[0:3,3]], pointColorsRGB=[[1,0,1]], pointSize=3)
     # ds6_v = np.array([[end_point_k[0,3] + 0.01125], [end_point_k[1,3]], [end_point_k[2,3] - 0.55443 + 0.16]])
 
     ds6w_v = np.linalg.norm(ds6_v - dw)
@@ -323,41 +412,92 @@ for i in range(200):
     alpha_0 = -alpha1 - alpha2
 
     # I3 = np.eye(3)
-
-
+    # u_sw0 = (ds6-dw)/(ds6-dw).norm()
     u_sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
-    u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],[u_sw0[2], 0, -u_sw0[0]],[-u_sw0[1], u_sw0[0], 0]])
-    R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
-    R_sw_psi.subs(psi, np.pi/30)
+    u_sw0_x = np.array([[0, -u_sw0[2], u_sw0[1]],
+                        [u_sw0[2], 0, -u_sw0[0]],
+                        [-u_sw0[1], u_sw0[0], 0]])
+    # u_sw0_x = u_sw0_x/np.linalg.norm(u_sw0_x)
+    # R_sw_psi = I3 + u_sw0_x * sympy.sin(-psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(-psi))
+    # R_sw_psi = sympy.Matrix(I3 + u_sw0_x * sympy.sin(psi) + u_sw0_x*u_sw0_x*(1-sympy.cos(psi)))
+    # R_sw_psi.subs(psi, np.pi/30)
     sv0 = np.array([0, 0, 1])
     sw0 = ((ds6_v-dw)/np.linalg.norm(ds6_v-dw)).reshape(3)
-
+    
     e_l = np.cross(sv0, sw0)
+    # e_l[2] = e_l[2] + L1
     e_l0 = e_l/np.linalg.norm(e_l)
-
+    # e_l0[2] = e_l0[2]
+    # e_l0 = np.array([0, 1, 0])
     e_l_x = e_l0[0]
     e_l_y = e_l0[1]
     e_l_z = e_l0[2]
-
+    
     e_l_X = np.array([[0, -e_l_z, e_l_y],
                       [e_l_z, 0, -e_l_x],
                       [-e_l_y, e_l_x, 0]])
-
+    
     R_l_alpha = I3 + e_l_X * np.sin(alpha_0) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha_0))
-
+    
     d3e0 = d34 * np.tan(theta4_0/2)
     dew0 = L3 + d3e0
     se0 = dew0 * np.dot(R_l_alpha, sw0)
-
+    
     r30_v = r30_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
-
-
+    # array([[ 0.67728209, -0.        ,  0.73572344],
+    #        [ 0.        ,  1.        ,  0.        ],
+    #        [-0.73572344,  0.        ,  0.67728209]
+    
+    # z300 = (se0/np.linalg.norm(se0))
+    # # y300 = -np.sign(np.sin(theta4_0)) * e_l0
+    # y300 = e_l0
+    # x300 = np.cross(y300, z300)
     z300 = (se0/np.linalg.norm(se0))
-
-    y300 = e_l0
-    x300 = np.cross(y300, z300)
-    rt = np.array([[-1, 0, 0],[0, -1, 0],[0, 0, 1]])
-    R300 = np.dot(np.array([x300,y300,z300]).reshape(3,3),rt)
+    x30 = z300[0]
+    y30 = z300[1]
+    z30 = z300[2]
+    alpha13 = -np.arctan2(np.sqrt(x30**2+y30**2),z30)
+    # sv13 = np.array([0, 0, 1])
+    # e_l13 = np.cross(se0, sv13)
+    # e_l130 = e_l13/np.linalg.norm(e_l13)
+    # q1 = np.quaternion(1,2,3,4)
+    # q2 = quaternion.from_float_array([1,2,3,4])
+    # q3 = quaternion.from_rotation_matrix([[1,2,3],[1,2,3],[1,2,3]])
+    # q4 = quaternion.from_euler_angles([1,2,3])
+    # print(q1,q2,q3,q4)
+    # e_l_x13 = e_l130[0]
+    # e_l_y13 = e_l130[1]
+    # e_l_z13 = e_l130[2]
+    # e_l_X13 = np.array([[0, -e_l_z13, e_l_y13],
+    #                     [e_l_z13, 0, -e_l_x13],
+    #                     [-e_l_y13, e_l_x13, 0]])
+    # R3001 = (I3 + e_l_X13 * np.sin(alpha13) + np.dot(e_l_X13, e_l_X13) * (1 - np.cos(alpha13)))
+    R3001 = (I3 + e_l_X * np.sin(alpha13) + np.dot(e_l_X, e_l_X) * (1 - np.cos(alpha13))).T
+    y13 = np.dot([0, 1, 0],R3001)
+    y13_5 = np.linalg.norm(e_l0-y13)
+    alphay13 = np.arccos((2-y13_5**2)/2)
+    e_l_Xy13 = np.array([[0, -z30, y30],
+                         [z30, 0, -x30],
+                         [-y30, x30, 0]])
+    R3002 = (I3 + e_l_Xy13 * np.sin(alphay13) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(alphay13))).T
+    R3003 = np.dot(R3001,R3002).T
+    # R300 = R3001
+    # p.addUserDebugLine([y13[0],y13[1],y13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+    # yyy = np.dot(y13,R3002)
+    # p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.8], lineWidth=5)
+    
+    # for i in np.arange(0,np.pi*2,np.pi/12):
+    #     r3002 = (I3 + e_l_Xy13 * np.sin(i) + np.dot(e_l_Xy13, e_l_Xy13) * (1 - np.cos(i)))
+    #     yyy = np.dot(r3002,y13)
+    #     p.addUserDebugLine([yyy[0],yyy[1],yyy[2]+L1], [0, 0, L1], lineColorRGB=[0.3,0.8,0.8], lineWidth=5)
+    #     sleep(1.)
+    
+    # np.dot(R300,[0, 1, 0])
+    # xyz13 = np.dot([0, 0, 1],R3001)
+    # p.addUserDebugLine([xyz13[0],xyz13[1],xyz13[2]+L1], [0, 0, L1], lineColorRGB=[1.,0.8,0.], lineWidth=5)
+    
+    rz13 = np.array([[-1,0,0],[0,-1,0],[0,0,1]])
+    R300 = np.dot(R3003,rz13)
 
     As = np.dot(u_sw0_x, R300)
     Bs = np.dot(-np.dot(u_sw0_x, u_sw0_x), R300)
@@ -381,8 +521,10 @@ for i in range(200):
     theta_i_0[7] = theta8_0
 
     end_pos_new = DHParameter().DH_compute(theta_i_0)
-    p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
-    p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+    # p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
+    # p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
+    p.addUserDebugPoints(pointPositions=[end_pos_new[0:3,3]], pointColorsRGB=[[1,0,1]], pointSize=3)
+    p.addUserDebugPoints(pointPositions=[end_point_k[0:3,3]], pointColorsRGB=[[1,0,1]], pointSize=3)
     # p.addUserDebugLine(ds6_v, ds6_v_1, lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
     end_pos_new_1 = end_pos_new
     # end_point_k_1 = end_point_k
@@ -390,7 +532,7 @@ for i in range(200):
     # end_point_k = end_pos_new
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
     sleep(1./240.)
-p.stopStateLogging(log_id)
+# p.stopStateLogging(log_id)
     
 # %%
 for i in np.arange(np.pi,0,-0.002):
@@ -448,10 +590,10 @@ p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPosition
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
 
-joint_T_all[2].subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2])])
+joint_T_all[2].subs([(theta1,theta_i_0[0]), (theta2,theta_i_0[1]), (theta3,theta_i_0[2])])
 joint_T_all[0].subs([(theta1,theta_i[0]), (theta2,theta_i[1]), (theta3,theta_i[2])])
 
-
+joint_T_all[2].subs([(theta1,theta_i_tt[0]), (theta2,theta_i_tt[1]), (theta3,theta_i_tt[2])])
 
 
 As = np.dot(u_sw0_x, R30_v)
@@ -460,11 +602,27 @@ Cs = np.dot(np.dot(u_sw0, u_sw0.T), R30_v)
 
 pl1 = p.addUserDebugLine(end_point[0:3,3], end6_v[0:3,3].reshape(3), lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
 
-p.removeUserDebugItem(pl1)
+
+a = (ds6_v).reshape(3)
+b = se0 + dw.reshape(3)
+c = a-b
+xxxxx = xyz13.copy()
+xxxxx[2] = xxxxx[2] + L1
+# aa = (d30_v-dw).reshape(3)
+pl1 = p.addUserDebugLine(a, dw.reshape(3), lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
+# pl2 = p.addUserDebugLine(aa, dw.reshape(3), lineColorRGB=[0.2,0.4,0.9], lineWidth=5)
+pl3 = p.addUserDebugLine(e_l0, [0, 0, 0], lineColorRGB=[0.2,0.2,0.9], lineWidth=5)
+pl4 = p.addUserDebugLine(b, dw.reshape(3), lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
+pl5 = p.addUserDebugLine(a, b, lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
+# pl6 = p.addUserDebugLine([-0.90976862, -0.41511573,  1.], dw.reshape(3), lineColorRGB=[0.2,0.6,0.4], lineWidth=5)
+# pl7 = p.addUserDebugLine([-0.90976862, -0.41511573,  10.], dw.reshape(3), lineColorRGB=[0.2,0.6,0.4], lineWidth=5)
+pl8 = p.addUserDebugLine(xxxxx, dw.reshape(3), lineColorRGB=[0.6,0.2,0.9], lineWidth=5)
+
+p.removeUserDebugItem(pl6)
 
 pl2 = p.addUserDebugLine([-4.13329534e-01, 0, 0], [-4.13329534e-01, 0, 1], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
 
-p.removeUserDebugItem(pl2)
+p.removeUserDebugItem(pl7)
 
 x = []
 y = []
@@ -502,7 +660,7 @@ d3e = d34 * np.tan(theta_i[3]/2)
 dew = L3 + d3e
 ds6e = L5 + d3e
 
-
+np.dot(np.array([[1, 0, 0, 1],[0, 1, 0, 0],[0, 0, 1, 0],[0, 0, 0, 1]]), r30_v)
 
 x = []
 y = []
@@ -566,9 +724,12 @@ eq = sympy.Eq(np.pi - sympy.acos(-(ds6w_v**2 - dewt**2 - ds6et**2) / (2 * dewt *
 theta4_0t = sympy.solve(eq, theta4t)
 
 
-
-
-
+theta_i_tt = theta_i_0.copy()
+theta_i_tt[0] = -1.1
+theta_i_tt[5] = theta_i_tt[5]
+theta_i_tt[2] = theta_i_tt[2] - 1.1
+p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_tt)
+end_pos_new = DHParameter().DH_compute(theta_i_tt)
 
 
 
