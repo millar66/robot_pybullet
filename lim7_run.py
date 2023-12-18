@@ -233,20 +233,22 @@ f_19 = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','th
         'end1','end2','end3','end4','end5','end6','end7','end8','end9','end10','end11','end12',\
         'thetak1','thetak2','thetak3','thetak4','thetak5','thetak6','thetak7','thetak8'), f19, "numpy")
 
-run_x = 0.4
+sign = 1
+run_x = 0.
 run_y = -0.
-run_z = 0.
+run_z = 0.2
 end_roll = 0
 end_pitch = 0
 end_yaw = 0
+derr = 1
 T_run = np.array([[1, 0, 0, run_x],
-                  [0, 1, 0, run_y],
-                  [0, 0, 1, run_z],
+                  [0, np.cos(3.14/180), -np.sin(3.14/180), run_y],
+                  [0, np.sin(3.14/180),  np.cos(3.14/180), run_z],
                   [0, 0, 0, 1]])
 end_point_end = np.matmul(end_point_start, T_run)
-step_x = run_x / 480.
-step_y = run_y / 480.
-step_z = run_z / 480.
+step_x = run_x / 200.
+step_y = run_y / 200.
+step_z = run_z / 200.
 i=0
 
 T_step = np.array([[1, 0, 0, step_x],
@@ -257,16 +259,38 @@ err_list = []
 theta_i_list = [theta_i]
 end_point_k = end_point_start.copy()
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/joint7_z_ok_form_low.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/roll.mp4")
 
-for j in range(600):
+for j in range(500):
 # for time_sin in range(240):
+    
+    if j % 40 == 0:
+        sign = -sign
+    # if j % 40 == 0:
+    #     sign = -sign
+    # sign = 0
+    T_x = np.array([[1, 0, 0, step_x*sign],
+                    [0, np.cos(3.14/180*derr*sign), -np.sin(3.14/180*derr*sign), step_y*sign],
+                    [0, np.sin(3.14/180*derr*sign),  np.cos(3.14/180*derr*sign), step_z*sign],
+                    [0, 0, 0, 1]])
+    T_y = np.array([[np.cos(3.14/180*derr*sign), 0, np.sin(3.14/180*derr*sign), 0],
+                    [0,               1, 0,            0],
+                    [-np.sin(3.14/180*derr*sign), 0, np.cos(3.14/180*derr*sign), 0],
+                    [0,               0, 0,            1]])
+    T_z = np.array([[np.cos(3.14/180*derr*sign), -np.sin(3.14/180*derr*sign), 0, 0],
+                    [np.sin(3.14/180*derr*sign), np.cos(3.14/180*derr*sign),    0, 0],
+                    [0,            0,               1, 0],
+                    [0,            0,               0, 1]])
 
-    end_point_k = np.matmul(end_point_k, T_step)
+    # end_point_k = np.matmul(end_point_k, T_step)
+    end_point_k = np.matmul(end_point_k, T_z)
+    end_point_k = np.matmul(end_point_k, T_y)
+    end_point_k = np.matmul(end_point_k, T_x)
     
     theta_i[5] = theta_i[5] + np.pi/2
     theta_ik = theta_i
     p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=5)
+    # p.addUserDebugPoints(pointPositions=[end_pos_new[0:3,3]], pointColorsRGB=[[0.3,1,0]], pointSize=5)
     end_pos_new_1 = end_pos_new
     start_time2 = time()
     f_theta_i = f_funcs(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7],\

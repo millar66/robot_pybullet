@@ -6,52 +6,6 @@ Created on Thu Dec 14 10:40:10 2023
 @author: lihui.liu
 """
 
-alpha,beta,gamma = sympy.symbols(['alpha','beta','gamma'])
-d_x,d_y,d_z = sympy.symbols(['d_x','d_y','d_z'])
-T_x = sympy.Matrix([[1, 0,      0,     0],
-                    [0, sympy.cos(gamma), -sympy.sin(gamma), 0],
-                    [0, sympy.sin(gamma),  sympy.cos(gamma), 0],
-                    [0, 0,      0,     1]])
-T_y = sympy.Matrix([[ sympy.cos(beta), 0, sympy.sin(beta), 0],
-                    [ 0,     1, 0,     0],
-                    [-sympy.sin(beta), 0, sympy.cos(beta), 0],
-                    [0,               0, 0,            1]])
-T_z = sympy.Matrix([[sympy.cos(alpha), -sympy.sin(alpha), 0, 0],
-                    [sympy.sin(alpha),  sympy.cos(alpha), 0, 0],
-                    [0,      0,     1, 0],
-                    [0,      0,     0, 1]])
-
-T_d = sympy.Matrix([[1, 0, 0, d_x],
-                    [0, 1, 0, d_y],
-                    [0, 0, 1, d_z],
-                    [0, 0, 0, 1]])
-
-R_xyz = T_x * T_y * T_z * T_d
-# R_zyx = T_z * T_y * T_x * T_d
-
-p_b = R_xyz * sympy.Matrix([0,0,0,1])
-# p_b2 = R_zyx * sympy.Matrix([0,0,0,1])
-
-z_b = R_xyz * np.array([[0], [0], [1], [1]])
-# z_b2 = R_zyx * np.array([[0], [0], [1], [1]])
-
-z_b[0] / p_b[0]
-z_b[1] / p_b[1]
-z_b[2] / p_b[2]
-
-R_xyz.subs([('alpha',1),('beta',2),('gamma',3),('d_x',4),('d_y',5),('d_z',6)])
-R_xyz_np = sympy.lambdify(('alpha','beta','gamma','d_x','d_y','d_z'), R_xyz, "numpy")
-R_xyz_v = R_xyz_np(1,2,3,4,5,6)
-
-# R_zyx.subs([('alpha',1),('beta',2),('gamma',3),('d_x',4),('d_y',5),('d_z',6)])
-# R_zyx_np = sympy.lambdify(('alpha','beta','gamma','d_x','d_y','d_z'), R_zyx, "numpy")
-# R_zyx_v = R_zyx_np(1,2,3,4,5,6)
-
-
-
-
-
-# %%
 T_xyz = np.array([[1, 0, 0, step_x],
                   [0, 1, 0, step_y],
                   [0, 0, 1, step_z],
@@ -123,7 +77,7 @@ L8 = 0.55443-0.16
 d78 = 0.04050
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0, 0, 0, 0, 0, 0]
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
-theta_i = [-1.14272, 0.452729, 0.0, 1.909714728, -1.325663, 0.491105, 0, 1.1958022, 0, 0, 0]
+theta_i = [-1.14272, 0.452729, 0.0, 1.909714728, -0.325663, 0.491105, 0, 1.1958022, 0, 0, 0]
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
 # theta_i = [0.0, 0.8043512, -0.4094627, 2.08250059, -0.000558530805, 0.52248341, 0, -0.40918375, 0, 0, 0]
 # theta_i = [0, 3.14159/3.8, 0, 0, 0, 0, 0, 0, 0, 0, 0]
