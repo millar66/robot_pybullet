@@ -1,115 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Dec 14 10:40:10 2023
+Created on Mon Dec 25 13:58:37 2023
 
 @author: lihui.liu
 """
+q1 = np.array([[0],[0],[0.27985]])
+q2 = np.array([[0],[0],[0.27985]])
+q3 = np.array([[0],[0],[0.27985]])
+q4 = np.array([[-0.04951],[0],[0.27985+0.36330]])
+q5 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
+q6 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
 
-pos = np.loadtxt("/home/lihui.liu/Downloads/2023_12_13_10_02_53.txt",usecols=(range(0,20)),delimiter=',',skiprows=27705,unpack=False,ndmin=0,encoding='bytes')
+w1 = np.array([[0],[0],[1]])
+w2 = np.array([[0],[1],[0]])  
+w3 = np.array([[0],[0],[1]])
+w4 = np.array([[0],[-1],[0]])
+w5 = np.array([[0],[0],[1]])
+w6 = np.array([[0],[1],[0]])
+M0 = np.array([[0, -1, 0, 0],[0, 0, 1, 0],[-1, 0, 0, 0.27985+0.36330+0.36665],[0, 0, 0, 1]])
 
-# %%
-x = []
-for i in range(0,192397):
-    x.append(i)
+# q1 = np.array([[0],[0],[0.27985]])
+# q2 = np.array([[0],[0],[0.27985]])
+# q3 = np.array([[0],[0],[0.27985]])
+# q4 = np.array([[-0.04951],[0],[0.27985+0.36330]])
+# q5 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
+# q6 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
 
-# plt.xlabel('x')
-# plt.ylabel('y')
-# plt.title("pos")
-# plt.plot(x, pos[:,0])
-# plt.show()
-
-# 192397
-endx = pos[:,0]
-endy = pos[:,1]
-endz = pos[:,2]
-enda = pos[:,3]
-endb = pos[:,4]
-endc = pos[:,5]
-endxd = pos[:,14]
-endyd = pos[:,15]
-endzd = pos[:,16]
-endad = pos[:,17]
-endbd = pos[:,18]
-endcd = pos[:,19]
-
-end_point_j = np.vstack([endx,endy,endz])
-end_point_d = np.vstack([endxd,endyd,endzd])
-
-# %%
-
-
-
-
-
-
-# %%
-alpha,beta,gamma = sympy.symbols(['alpha','beta','gamma'])
-d_x,d_y,d_z = sympy.symbols(['d_x','d_y','d_z'])
-T_x = sympy.Matrix([[1, 0,      0,     0],
-                    [0, sympy.cos(gamma), -sympy.sin(gamma), 0],
-                    [0, sympy.sin(gamma),  sympy.cos(gamma), 0],
-                    [0, 0,      0,     1]])
-T_y = sympy.Matrix([[ sympy.cos(beta), 0, sympy.sin(beta), 0],
-                    [ 0,     1, 0,     0],
-                    [-sympy.sin(beta), 0, sympy.cos(beta), 0],
-                    [0,               0, 0,            1]])
-T_z = sympy.Matrix([[sympy.cos(alpha), -sympy.sin(alpha), 0, 0],
-                    [sympy.sin(alpha),  sympy.cos(alpha), 0, 0],
-                    [0,      0,     1, 0],
-                    [0,      0,     0, 1]])
-
-T_d = sympy.Matrix([[1, 0, 0, d_x],
-                    [0, 1, 0, d_y],
-                    [0, 0, 1, d_z],
-                    [0, 0, 0, 1]])
-
-R_xyz = T_x * T_y * T_z * T_d
-# R_zyx = T_z * T_y * T_x * T_d
-
-p_b = R_xyz * sympy.Matrix([0,0,0,1])
-# p_b2 = R_zyx * sympy.Matrix([0,0,0,1])
-
-z_b = R_xyz * np.array([[0], [0], [1], [1]])
-# z_b2 = R_zyx * np.array([[0], [0], [1], [1]])
-
-z_b[0] / p_b[0]
-z_b[1] / p_b[1]
-z_b[2] / p_b[2]
-
-R_xyz.subs([('alpha',1),('beta',2),('gamma',3),('d_x',4),('d_y',5),('d_z',6)])
-R_xyz_np = sympy.lambdify(('alpha','beta','gamma','d_x','d_y','d_z'), R_xyz, "numpy")
-R_xyz_v = R_xyz_np(1,2,3,4,5,6)
-
-# R_zyx.subs([('alpha',1),('beta',2),('gamma',3),('d_x',4),('d_y',5),('d_z',6)])
-# R_zyx_np = sympy.lambdify(('alpha','beta','gamma','d_x','d_y','d_z'), R_zyx, "numpy")
-# R_zyx_v = R_zyx_np(1,2,3,4,5,6)
-
-
-
-
-
-# %%
-T_xyz = np.array([[1, 0, 0, step_x],
-                  [0, 1, 0, step_y],
-                  [0, 0, 1, step_z],
-                  [0, 0, 0, 1]])
-
-T_roll = np.array([[1, 0,            0,               0],
-                   [0, orn_cos_x, orn_sin_x*-1, 0],
-                   [0, orn_sin_x, orn_cos_x,    0],
-                   [0, 0,            0,               1]])
-T_pitch = np.array([[orn_cos_y,    0, orn_sin_y, 0],
-                    [0,               1, 0,            0],
-                    [orn_sin_y*-1, 0, orn_cos_y, 0],
-                    [0,               0, 0,            1]])
-T_yaw = np.array([[orn_cos_z, orn_sin_z*-1, 0, 0],
-                  [orn_sin_z, orn_cos_z,    0, 0],
-                  [0,            0,               1, 0],
-                  [0,            0,               0, 1]])
-
-T_all = np.dot(T_roll, np.dot(T_pitch,T_yaw))
-# theta_i = [-1.1, 0.45272920, 1.142726-1.1, 1.909714, -0.35656702, 0.4630274, 0, 1.2834317, 0, 0, 0]
+# w1 = np.array([[0],[0],[1]])
+# w2 = np.array([[0],[1],[0]])  
+# w3 = np.array([[0],[0],[1]])
+# w4 = np.array([[0],[-1],[0]])
+# w5 = np.array([[0],[0],[1]])
+# w6 = np.array([[0],[1],[0]])
+# M0 = np.array([[0, -1, 0, 0],[0, 0, 1, 0],[-1, 0, 0, 0.27985+0.36330+0.36665],[0, 0, 0, 1]])
 
 # %%
 joint_T_all = DHParameter().func_dh8_all(theta_i)
@@ -161,8 +85,12 @@ L8 = 0.55443-0.16
 d78 = 0.04050
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0, 0, 0, 0, 0, 0]
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
-# theta_i = [-1.14272, 0.452729, 0.0, 1.909714728, -1.325663, 0.491105, 0, 1.1958022, 0, 0, 0]
+theta_i = np.array([0, 0.7, 0.6, 2.3, -0.68, 0.55, -0.0, 0., 0.5, 0.5, 0.5])
+# theta_i = np.array([0, 0., 0., 0, -0., 0., -0.0, 0., 0.5, 0.5, 0.5])
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+end_point = DHParameter().DH_compute(theta_i)
+end_point_poe = PF().fk6(theta_i)
+p.addUserDebugPoints(pointPositions=[end_point[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
 # theta_i = [0.0, 0.8043512, -0.4094627, 2.08250059, -0.000558530805, 0.52248341, 0, -0.40918375, 0, 0, 0]
 # theta_i = [0, 3.14159/3.8, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 # theta_i = [0, 0.7, 0.8, 2.3, -0.5, 0.3, -0.06, 0.5, 0.5, 0.5, 0.5]
@@ -190,58 +118,18 @@ end8_v = end8_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[
 #                    [ 1.54421550e-16, -1.00000000e+00, -1.38620230e-16, -1.05227436e-16],
 #                    [-7.19537065e-01, -1.48466495e-17, -6.94454039e-01, 4.74262818e-01],
 #                    [ 0.00000000e+00,  0.00000000e+00,  0.00000000e+00, 1.00000000e+00]])
-end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
-                      [ 0.        , -1.        , -0.        ,  0.22222222],
-                      [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
-                      [ 0.        ,  0.        ,  0.        ,  1.        ]])
-end_point = np.array([[-0.98407787, -0.98317734, -0.10159356, -4.13329534e-01],
-                      [ 0.98407787,  0.14071143,  0.10858652,  0.22222222],
-                      [ 0.11645863,  0.09246443,  0.98888205, 4.74262818e-01],
-                      [ 0.        ,  0.        ,  0.        ,  1.        ]])
+# end_point = np.array([[ 0.69445404,  0.        , -0.71953706, -4.13329534e-01],
+#                       [ 0.        , -1.        , -0.        ,  0.22222222],
+#                       [-0.71953706,  0.        , -0.69445404,  4.74262818e-01],
+#                       [ 0.        ,  0.        ,  0.        ,  1.        ]])
+# end_point = np.array([[-0.98407787, -0.98317734, -0.10159356, -4.13329534e-01],
+#                       [ 0.98407787,  0.14071143,  0.10858652,  0.22222222],
+#                       [ 0.11645863,  0.09246443,  0.98888205, 4.74262818e-01],
+#                       [ 0.        ,  0.        ,  0.        ,  1.        ]])
 
 end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
 end0_d = np.dot(end_point, end_bias)
 # ds6_r = np.dot(end0_d[0:3,0:3], np.array([[1, 0, 0],[0, 0, -1],[0, 1, 0]]))
-
-# %% test
-end_pos_new = np.array([[-0.64029595, -0.76779092,  0.02276398, -0.11186384],
-                        [-0.58731913,  0.50846206,  0.62970038,  0.49846492],
-                        [-0.49505286,  0.38982488, -0.77650449,  0.43479268],
-                        [ 0.        ,  0.        ,  0.        ,  1.        ]])
-
-aa = np.dot(end_pos_new, [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
-bb = np.dot(aa, [[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
-cc = np.dot(aa, [[1, 0, 0, 0], [0, 1, 0, -0.04050], [0, 0, 1, 0], [0, 0, 0, 1]])
-# p.addUserDebugLine(end_point_k[0:3,3], end_point_k_1[0:3,3], lineColorRGB=[0.8,0.1,0.2], lineWidth=5)
-p.addUserDebugPoints(pointPositions=[aa[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
-p.addUserDebugPoints(pointPositions=[bb[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
-p.addUserDebugPoints(pointPositions=[cc[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
-
-T8 = np.array([[np.cos(theta_i[7]),np.sin(theta_i[7]),0,0],
-              [-np.sin(theta_i[7]),np.cos(theta_i[7]),0,0],
-              [0, 0, 1,0],
-              [0, 0, 0, 1]])
-np.dot(cc,T8)
-
-z8 = end_pos_new[0:3,3] - aa[0:3,3]
-z8_1 = z8/np.linalg.norm(z8)
-l8 = z8/np.linalg.norm(z8)
-# l8 = np.cross(sv0, sw0)
-# e_l[2] = e_l[2] + L1
-# e_l0 = e_l/np.linalg.norm(e_l)
-# e_l0[2] = e_l0[2]
-# e_l0 = np.array([0, 1, 0])
-l8_x = l8[0]
-l8_y = l8[1]
-l8_z = l8[2]
-l8_X = np.array([[0, -l8_z, l8_y],
-                 [l8_z, 0, -l8_x],
-                 [-l8_y, l8_x, 0]])
-l8_t = I3 + l8_X * np.sin(-theta_i[7]) + np.dot(l8_X, l8_X) * (1 - np.cos(-theta_i[7]))
-
-dd = np.dot(l8_t,(bb[0:3,3]-aa[0:3,3]).T) + aa[0:3,3]
-p.addUserDebugPoints(pointPositions=[dd], pointColorsRGB=[[0.5,0.2,1]], pointSize=10)
-
 
 # %%
 # d3e = d34 * sympy.tan(theta4/2)
@@ -255,6 +143,7 @@ p.addUserDebugPoints(pointPositions=[dd], pointColorsRGB=[[0.5,0.2,1]], pointSiz
 
 # ds6 = sympy.Matrix([(joint_T_all[4][0,3]), (joint_T_all[4][1,3]), (joint_T_all[4][2,3])])
 ds6_v = end0_d[0:3,3].reshape(3,1)
+p.addUserDebugPoints(pointPositions=[end0_d[0:3,3]], pointColorsRGB=[[1,1,0]], pointSize=10)
 # ds6_v = np.array([[-0.10139713],
 #                   [ 0.        ],
 #                   [ 0.71903507]])
@@ -282,6 +171,91 @@ theta41 = np.pi*2 - thetaO4 - thetaOd1 - thetaOd2
 # %%
 # theta4_0 = np.pi - np.arccos(-(ds6w_v**2 - ds6e**2 - dew**2) / (2 * ds6e * dew))
 theta4_0 = theta41
+
+# %%
+em4 = PF().eps(-theta_i[3],3)
+pm4 = em4 @ np.vstack((q3,1))
+
+g1 = end_point_poe @ np.linalg.inv(M0)
+q3tilde = np.vstack((q3,1))
+pm6 = np.linalg.inv(g1) @ q3tilde
+
+u_vec = pm6[0:3] - M0[0:3,3].reshape(3,1)
+v_vec = pm4[0:3] - M0[0:3,3].reshape(3,1)
+
+alpha_axis = w5.T @ v_vec
+beta_axis = w6.T @ u_vec
+gamma_axis = np.sqrt(np.linalg.norm(u_vec)**2-alpha_axis**2-beta_axis**2)
+z_vec = alpha_axis*w5 + beta_axis*w6 + gamma_axis*(np.cross(w5.T,w6.T)).T
+c_vec = z_vec + M0[0:3,3].reshape(3,1)
+
+u_throw = u_vec - w6@w6.T@u_vec
+v_throw = v_vec - w5@w5.T@v_vec
+
+v6_throw = z_vec - w6@w6.T@z_vec
+u5_throw = z_vec - w5@w5.T@z_vec
+
+theta6_0 = np.arctan2(w6.T@(np.cross(u_throw.T,v6_throw.T).T), u_throw.T@v6_throw)
+theta5_0 = np.arctan2(w5.T@(np.cross(u5_throw.T,v_throw.T).T), u5_throw.T@v_throw)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+em5 = PF().eps(-theta_i[4],4)
+em6 = PF().eps(theta_i[5],5)
+ew5 = PF().epw(-theta_i[4],4)
+ew6 = PF().epw(theta_i[5],5)
+
+em5t @ em6t @ pm6 - pm4
+c56 = em6 @ pm6
+c_vec = c56[0:3] - M0[0:3,3].reshape(3,1)
+
+p.addUserDebugPoints(pointPositions=c56[0:3].T, pointColorsRGB=[[0.6,0.2,0.9]], pointSize=10)
+p.addUserDebugPoints(pointPositions=pm4[0:3].T, pointColorsRGB=[[0.,0.9,0.1]], pointSize=10)
+p.addUserDebugPoints(pointPositions=pm6[0:3].T, pointColorsRGB=[[0.9,0.2,0.1]], pointSize=10)
+
+z = ew6 @ u_vec
+z - ew5 @ v_vec
+
+em1t = PF().eps(theta_i[0],0)
+em2t = PF().eps(theta_i[1],1)
+em3t = PF().eps(theta_i[2],2)
+em4t = PF().eps(theta_i[3],3)
+em5t = PF().eps(theta_i[4],4)
+em6t = PF().eps(theta_i[5],5)
+em1t @ em2t @ em3t @ em4t @ em5t @ em6t @ M0
+em1t @ em2t @ em3t @ em4t @ np.vstack((q5,1))
+
+em5t @ em6t @ end_point_poe
+ew5t = PF().eps(theta_i[4],4)
+ew6t = PF().eps(theta_i[5],5)
+ew5t @ ew6t @ end_point_poe[:,3].reshape(4,1)
+em5t @ em6t @ end_point_poe
+em5t @ end_point_poe
+
+
+em1t = PF().eps(theta_i[0],0)
+em2t = PF().eps(theta_i[1],1)
+em3t = PF().eps(theta_i[2],2)
+
+em1t @ em2t @ em3t @ np.vstack((q3,1))
+
+
+
+
+# %%
 alpha1 = np.arctan2(d34,L3)
 alpha2 = np.arccos((dwo4**2 + ds6w_v**2 - dso4**2) / (2 * dwo4 * ds6w_v))
 alpha_0 = -alpha1 - alpha2
@@ -438,8 +412,8 @@ theta3_0 = np.arctan2((As[2,1]*np.sin(psi) + Bs[2,1]*np.cos(psi) + Cs[2,1]),(-As
 theta_i_0 = theta_i.copy()
 theta_i_0[0:4] = [theta1_0, theta2_0, theta3_0, theta4_0]
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
-print(theta1_0/6.28*360,'\n',theta2_0/6.28*360,'\n',theta3_0/6.28*360)
-print(theta_i[0]/6.28*360,'\n',theta_i[1]/6.28*360,'\n',theta_i[2]/6.28*360)
+print(theta1_0/6.28*360,'\n',theta2_0/6.28*360,'\n',theta3_0/6.28*360,'\n',theta4_0/6.28*360)
+print(theta_i[0]/6.28*360,'\n',theta_i[1]/6.28*360,'\n',theta_i[2]/6.28*360,'\n',theta_i[3]/6.28*360)
 # %%
 r40_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
 # r64_v = r40_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])

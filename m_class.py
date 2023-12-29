@@ -22,6 +22,7 @@ import xml.dom.minidom
 
 import re
 import sympy
+import scipy
 
 # 创建 Thread 的子类
 class Thread_print(Thread):
@@ -842,6 +843,91 @@ class DHParameter :
         # p.addUserDebugPoints(pointPositions=[point_joint[numJoints]], pointColorsRGB=[[1,0.5,0.3]], pointSize=12)
         
         return T_i
+    
+class PoE_func:
+    def TfromRp(R,p):
+        return np.array([np.append(R[0,],p[0]),np.append(R[1,],p[1]),np.append(R[2,],p[2]),[0,0,0,1]])
+    def so3ToVec(self,so3):
+        return np.array([[so3[2,1]],[so3[0,2]],[so3[1,0]]])
+    def VecToSo3(self,vec):
+        return np.array([[0,-vec[2,0],vec[1,0]],[vec[2,0],0,-vec[0,0]],[-vec[1,0],vec[0,0],0]])
+    def Se3ToVec(self,se3):
+        S0_T_Matrix = scipy.linalg.logm(se3)
+        omega_operation = self.so3ToVec(S0_T_Matrix[0:3,0:3])
+        return np.append(omega_operation,S0_T_Matrix[0:3,3]).reshape(6,1)
+    def VecToSe3(self,S0_T_matrix=np.eye(4),theta=0):
+        R_operation_skew = self.VecToSo3(S0_T_matrix[0:3])*theta
+        return np.array([np.append(R_operation_skew[0,],S0_T_matrix[3]*theta),np.append(R_operation_skew[1,],S0_T_matrix[4]*theta),np.append(R_operation_skew[2,],S0_T_matrix[5]*theta),[0,0,0,0]])
+    # def SToqsh(S):
+    #     omega_operation = S[0:3]
+    #     omega_operation_hat = omega_operation/np.linalg.norm(omega_operation)
+    #     q = -np.cross(S[0:3],S[3:6])
+    #     # q_hat = q/np.linalg.norm(q)
+    #     return omega_operation_hat,q
+    def fk6(self,theta=np.zeros(6)):
+        # q1 = np.array([[0],[0],[0.27985]])
+        # q2 = np.array([[0],[0],[0.27985]])
+        # q3 = np.array([[0],[0],[0.27985]])
+        # q4 = np.array([[-0.04951],[0],[0.27985+0.36330]])
+        # q5 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
+        # q6 = np.array([[0],[0],[0.27985+0.36330+0.36665]])
+
+        # w1 = np.array([[0],[0],[1]])
+        # w2 = np.array([[0],[1],[0]])  
+        # w3 = np.array([[0],[0],[1]])
+        # w4 = np.array([[0],[-1],[0]])
+        # w5 = np.array([[0],[0],[1]])
+        # w6 = np.array([[0],[1],[0]])
+
+        M0 = np.array([[0, -1, 0, 0],[0, 0, 1, 0],[-1, 0, 0, 0.27985+0.36330+0.36665],[0, 0, 0, 1]])
+
+        # epsilon1 = np.append(w1,np.cross(w1.T,-q1.T).T,axis=0)
+        # epsilon2 = np.append(w2,np.cross(w2.T,-q2.T).T,axis=0)
+        # epsilon3 = np.append(w3,np.cross(w3.T,-q3.T).T,axis=0)
+        # epsilon4 = np.append(w4,np.cross(w4.T,-q4.T).T,axis=0)
+        # epsilon5 = np.append(w5,np.cross(w5.T,-q5.T).T,axis=0)
+        # epsilon6 = np.append(w6,np.cross(w6.T,-q6.T).T,axis=0)
+        
+        epsilon1 = np.array([[0.],[0.],[1.],[0.],[0.],[0.]])
+        epsilon2 = np.array([[0.],[1.],[0.],[-0.27985],[0.],[0.]])
+        epsilon3 = np.array([[0.],[0.],[1.],[0.],[0.],[0.]])
+        epsilon4 = np.array([[0.],[-1.],[0.],[0.64315],[0.],[0.04951]])
+        epsilon5 = np.array([[0.],[0.],[1.],[0.],[0.],[0.]])
+        epsilon6 = np.array([[0.],[1.],[0.],[-1.0098],[0.],[0.]])
+
+        s1_T = self.VecToSe3(epsilon1,theta[0])
+        s2_T = self.VecToSe3(epsilon2,theta[1])
+        s3_T = self.VecToSe3(epsilon3,theta[2])
+        s4_T = self.VecToSe3(epsilon4,theta[3])
+        s5_T = self.VecToSe3(epsilon5,theta[4])
+        s6_T = self.VecToSe3(epsilon6,theta[5])
+
+        eps1 = scipy.linalg.expm(s1_T)
+        eps2 = scipy.linalg.expm(s2_T)
+        eps3 = scipy.linalg.expm(s3_T)
+        eps4 = scipy.linalg.expm(s4_T)
+        eps5 = scipy.linalg.expm(s5_T)
+        eps6 = scipy.linalg.expm(s6_T)
+
+        return eps1 @ eps2 @ eps3 @ eps4 @ eps5 @ eps6 @ M0
+    def eps(self,theta=0,i=0):
+
+        epsilon = np.array([[0.,0.,1.,0.,0.,0.],[0.,1.,0.,-0.27985,0.,0.],[0.,0.,1.,0.,0.,0.],[0.,-1.,0.,0.64315,0.,0.04951],[0.,0.,1.,0.,0.,0.],[0.,1.,0.,-1.0098,0.,0.]])
+        s_T = self.VecToSe3(epsilon[i].reshape(6,1),theta)
+        eps = scipy.linalg.expm(s_T)
+        return eps
+    def epw(self,theta=0,i=0):
+
+        epsilon = np.array([[0.,0.,1.,0.,0.,0.],[0.,1.,0.,-0.27985,0.,0.],[0.,0.,1.,0.,0.,0.],[0.,-1.,0.,0.64315,0.,0.04951],[0.,0.,1.,0.,0.,0.],[0.,1.,0.,-1.0098,0.,0.]])
+        s_T = self.VecToSo3(epsilon[i][0:3].reshape(3,1))*theta
+        epw = scipy.linalg.expm(s_T)
+        return epw
+    def Adjoint(self,T):
+        adt01 = np.dot(self.VecToSo3(T[0:3,3].reshape(3,1)),T[0:3,0:3])
+        adt0 = np.append(T[0:3,0:3],np.zeros([3,3]),axis=1)
+        adt1 = np.append(adt01,T[0:3,0:3],axis=1)
+        return np.append(adt0,adt1,axis=0)
+
     
     # def T_joint(self, theta=np.zeros(11)):
     #     T_joint[0] = np.array((1.0*(((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*cos(theta5) - 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*sin(theta5))*cos(theta6) - 1.0*(-1.0*(-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*sin(theta4) + 1.0*sin(theta2)*cos(theta1)*cos(theta4))*sin(theta6))*cos(theta8) + 1.0*(1.0*((-1.0*sin(theta1)*sin(theta3) + cos(theta1)*cos(theta2)*cos(theta3))*cos(theta4) + 1.0*sin(theta2)*sin(theta4)*cos(theta1))*sin(theta5) + 1.0*(1.0*sin(theta1)*cos(theta3) + 1.0*sin(theta3)*cos(theta1)*cos(theta2))*cos(theta5))*sin(theta8))
