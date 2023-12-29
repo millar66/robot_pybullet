@@ -311,8 +311,8 @@ f_19 = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6','th
         'end1','end2','end3','end4','end5','end6','end7','end8','end9','end10','end11','end12',\
         'thetak1','thetak2','thetak3','thetak4','thetak5','thetak6','thetak7','thetak8'), f19, "numpy")
 
-sign = 1
-signj = 1
+sign = -1
+signj = -1
 run_x = 0.0002
 run_y = -0.0002
 run_z = 0.0002
