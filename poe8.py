@@ -35,8 +35,10 @@ DRV5_LOW  = -2.70526
 DRV5_HIGH = 2.70526
 # DRV6_LOW  = 0.61
 # DRV6_HIGH = 2.53
-DRV6_LOW  = -0.3
-DRV6_HIGH = 0.61
+# DRV6_LOW  = -0.4
+# DRV6_HIGH = 0.61
+DRV6_LOW  = -np.pi/3
+DRV6_HIGH = np.pi/3
 DRV7_LOW  = -0.07
 DRV7_HIGH = 0.07
 DRV8_LOW  = -5.75
@@ -92,7 +94,7 @@ L8 = 0.55443-0.16
 d78 = 0.04050
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0, 0, 0, 0, 0, 0]
 theta_i = [0, 3.14159/3.8, 0, 3.1415926/1.5, 0, 0.5, 0, 0, 0, 0, 0]
-theta_i = np.array([0, 0.7, 0.6, 2.3, -0.68, -0., -0.0, 0., 0.5, 0.5, 0.5])
+theta_i = np.array([0, 0.7, 0.6, 2.3, -0.68, -0., -0.06, 0., 0.5, 0.5, 0.5])
 # theta_i = np.array([0, 0., 0., 0, -0., 0., -0.0, 0., 0.5, 0.5, 0.5])
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
 end_point_start = DHParameter().DH_compute(theta_i)
@@ -115,7 +117,7 @@ end8_np = sympy.lambdify(('theta1','theta2','theta3','theta4','theta5','theta6',
 # end8_v = end8_np(theta_i_0[0],theta_i_0[1],theta_i_0[2],theta_i_0[3],theta_i_0[4],theta_i_0[5],theta_i_0[6],theta_i_0[7])
 end8_v = end8_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5]+np.pi/2,theta_i[6],theta_i[7])
 
-end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
+end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16+theta_i[6]], [0, 0, 0, 1]])
 end0_d = np.dot(end_point_start, end_bias)
 # ds6_r = np.dot(end0_d[0:3,0:3], np.array([[1, 0, 0],[0, 0, -1],[0, 1, 0]]))
 
@@ -189,13 +191,26 @@ end_point_poe = PF().fk6(theta_i)
 # %%
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
 
+theta_i = np.array([0, 0.7, 0.6, 2.3, -0.68, -0., -0.09, 0.8, 0.5, 0.5, 0.5])
+theta_i = np.array([-0.166, 0.7422, 0.502, 2.478, -0.749, 0.29869, -0.0, 0.78, 0.5, 0.5, 0.5])
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+end_point_0 = DHParameter().DH_compute(theta_i)
+
 # %%
 # log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/fixed_joint6.mp4")
-theta_i = np.array([0, 0.7, 0.6, 2.3, -0.68, -0., -0.0, 0.8, 0.5, 0.5, 0.5])
+theta_i = np.array([-0.166, 0.7422, 0.502, 2.478, -0.749, 0.29869, -0.09, 0.78, 0.5, 0.5, 0.5])
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+# end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16+0.09], [0, 0, 0, 1]])
 end_point_start = DHParameter().DH_compute(theta_i)
 
+theta7_dir = end_point_start[2,3] - end_point_0[2,3]
+if theta7_dir > 0:
+    theta7_0 = -np.linalg.norm(end_point_start[0:3,3] - end_point_0[0:3,3])
+else:
+    theta7_0 = np.linalg.norm(end_point_start[0:3,3] - end_point_0[0:3,3])
+# theta7_0 = 0
+end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16+theta7_0], [0, 0, 0, 1]])
+                     
 psi = theta_i[7]
 theta8_0 = theta_i[7]
 # for i in np.arange(0,np.pi,0.0001):
@@ -206,14 +221,14 @@ signj = -1
     
 step_x = 0.00
 step_y = 0.00
-step_z = 0.002
+step_z = 0.001
 # step_x = 0.00
 # step_y = -0.000
 # step_z = 0.000
 # step_y = -0.0001
 # step_z = 0.0001
 thetax = 0
-thetay = 0.02
+thetay = 0.0
 thetaz = 0.0
 # thetax = 0.02
 
@@ -225,21 +240,24 @@ end_point_k_1 = end_point_k.copy()
 ds6_v_1 = ds6_v
 theta_i_0 = theta_i.copy()
 
+theta7_list = []
+theta7_dir_list = []
+
 # %%
 # log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/poe81.mp4")
 
-for i in range(500):
+for i in range(3000):
     
-    if i % 40 == 0:
+    if i % 160 == 0:
         sign = -sign
     if i % 28 == 0:
         signj = -signj
-    if i % 70 == 0:
+    if i % 300 == 0:
         sign8 = -sign8
     if sign8 == 1:
-        psi -= 0.02
+        psi += 0.002
     else:
-        psi += 0.02
+        psi -= 0.002
 
     theta8_0 = psi
     T_x = np.array([[1, 0, 0, step_x*sign],
@@ -268,12 +286,23 @@ for i in range(500):
     # noise = np.random.normal(loc=0.0, scale=0.002, size=8)
     # noise = np.random.uniform(-0.002, 0.002, 8)
 
-    p.addUserDebugLine(end_pos_new_1[0:3,3], end_point_k[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=1)
-    # p.addUserDebugPoints(pointPositions=[test_end_point_k[0:3]], pointColorsRGB=[[0.3,1,0]], pointSize=5)
+    # p.addUserDebugLine(end_pos_new_1[0:3,3], end_point_k[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=1)
+    # p.addUserDebugPoints(pointPositions=[end_point_k[0:3,3]], pointColorsRGB=[[0.3,1,0]], pointSize=8)
+    # p.addUserDebugPoints(pointPositions=[end_point_0[0:3,3]], pointColorsRGB=[[0.8,0.1,0.7]], pointSize=8)
     end_pos_new_1 = end_point_k
     # start_time2 = time()
     # end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16], [0, 0, 0, 1]])
     end_point_k8 = end_point_k @ np.array([[np.cos(-psi),-np.sin(-psi),0,0],[np.sin(-psi),np.cos(-psi),0,0],[0,0,1,0],[0,0,0,1]])
+    
+    theta7_dir = end_point_k8[2,3] - end_point_0[2,3]
+    if theta7_dir > 0:
+        theta7_0 = -np.linalg.norm(end_point_k8[0:3,3] - end_point_0[0:3,3])
+    else:
+        theta7_0 = np.linalg.norm(end_point_k8[0:3,3] - end_point_0[0:3,3])
+        # break
+    # theta7_0 = 0
+    end_bias = np.array([[1, 0, 0, 0.04050], [0, 1, 0, 0], [0, 0, 1, -0.55443+0.16-theta7_0], [0, 0, 0, 1]])
+    
     end0_d = np.dot(end_point_k8, end_bias)
     end0_d = end0_d @ np.array([[1,0,0,0],[0,0,-1,0],[0,1,0,0],[0,0,0,1]])
     ds6_v = end0_d[0:3,3].reshape(3,1)
@@ -325,14 +354,20 @@ for i in range(500):
     theta1_0 = np.arctan2(p456[1,2],p456[0,2])
     theta3_0 = np.arctan2(p456[2,1],-p456[2,0])
     theta_i_0[0:6] = theta1_0, theta2_0, theta3_0, theta4_0, theta5_0[0,0], theta6_0[0,0]
+    theta_i_0[6] = theta7_0
     theta_i_0[7] = theta8_0
+    theta7_list.append(theta7_0)
+    theta7_dir_list.append(theta7_dir)
     
     if not(DRV1_LOW < theta1_0 < DRV1_HIGH and DRV2_LOW < theta2_0 < DRV2_HIGH and DRV3_LOW < theta3_0 < DRV3_HIGH and \
         DRV4_LOW < theta4_0 < DRV4_HIGH and DRV5_LOW < theta5_0[0,0] < DRV5_HIGH and DRV6_LOW < theta6_0[0,0] < DRV6_HIGH):
+        print('*************limit***************')
         break
 
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
     sleep(1./240.)
+
+print('*************  The End  ***************')
 # p.stopStateLogging(log_id)
 
 # %%
@@ -356,6 +391,44 @@ p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPosition
 
 # %%
 
+# theta_i[0] = DRV1_LOW*(pi/180) + (DRV1_HIGH-DRV1_LOW)*(pi/180)*rand
+
+for i in range(20000):
+    theta_i[0] = random.uniform(DRV1_LOW, DRV1_HIGH)
+    theta_i[1] = random.uniform(DRV2_LOW, DRV2_HIGH)
+    theta_i[2] = random.uniform(DRV3_LOW, DRV3_HIGH)
+    theta_i[3] = random.uniform(DRV4_LOW, DRV4_HIGH)
+    theta_i[4] = random.uniform(DRV5_LOW, DRV5_HIGH)
+    theta_i[5] = random.uniform(DRV6_LOW, DRV6_HIGH)
+    theta_i[6] = random.uniform(DRV7_LOW, DRV7_HIGH)
+    theta_i[7] = random.uniform(DRV8_LOW, DRV8_HIGH)
+    p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
+    end_point_space = DHParameter().DH_compute(theta_i)
+    p.addUserDebugPoints(pointPositions=[end_point_space[0:3,3]], pointColorsRGB=[[0.8,0.1,0.7]], pointSize=3)
+    sleep(1./240.)
+    if i == 500:
+        # print(j,'\n')
+        print('500')
+    elif i == 1000:
+        print('1000')
+    elif i == 3000:
+        print('3000')
+    elif i == 6000:
+        print('6000')
+    elif i == 8000:
+        print('8000')
+    elif i == 11000:
+        print('11000')
+    elif i == 13000:
+        print('13000')
+    elif i == 16000:
+        print('16000')
+    elif i == 18000:
+        print('18000')
+
+
+
+# %%
 
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i_0)
 p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=theta_i)
