@@ -37,11 +37,40 @@ end_point_j = np.vstack([endx,endy,endz])
 end_point_d = np.vstack([endxd,endyd,endzd])
 
 # %%
+# 该控制方法比较接近真实的物理环境。
+maxForce = -5
+mode = p.VELOCITY_CONTROL
+p.setJointMotorControl2(robot_id, 2, controlMode=mode, force=maxForce)
 
 
 
 
 
+
+# %%
+
+scipy.linalg.expm([[0,-1,0,0],[1,0,0,0],[0,0,0,0],[0,0,0,0]])
+a = np.array([[1,2,3],[2,0,4],[3,4,5]])
+a, b = np.linalg.eig([[1,2,3],[2,0,4],[3,4,5]])
+c = np.diag(a)
+b @ c @ np.linalg.inv(b)
+b @ c @ b.T
+
+x = np.array([[1,2,3],[4,5,6]])
+y = np.array([[2,3],[4,5],[6,7]])
+result = np.dot(x, y)
+print(result)
+x.trace()
+np.inner(x,y.T)
+x @ y
+(x @ y).trace()
+
+a=np.array([[1,2],[3,4]])
+b=np.array([[5,6],[7,8]])
+np.dot(a,b)
+a @ b
+np.inner(a,b)
+np.matmul(a,b)
 
 # %%
 alpha,beta,gamma = sympy.symbols(['alpha','beta','gamma'])

@@ -244,7 +244,7 @@ theta7_list = []
 theta7_dir_list = []
 
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/poe81.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/poe71_run.mp4")
 
 for i in range(3000):
     

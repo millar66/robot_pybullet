@@ -7,7 +7,7 @@ import sys
 sys.path.append('/home/lihui.liu/mnt/workspace/python/robot/robot_pybullet')
 import pybullet as p
 import pybullet_data
-from time import sleep, time
+from time import sleep, time, localtime
 import timeit
 # import m_class
 from queue import Queue
@@ -283,15 +283,15 @@ f15 = sympy.Piecewise((1e10*theta3,thetak3 < DRV3_LOW), (-2/(DRV3_HIGH-DRV3_LOW)
 f16 = sympy.Piecewise((1e10*theta4,thetak4 < DRV4_LOW), (-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < (DRV4_HIGH + DRV4_LOW)/2), (2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV4_HIGH-DRV4_LOW)*(thetak4-(DRV4_HIGH+DRV4_LOW)/2)))-1) * (theta4-thetak4)**2, thetak4 < DRV4_HIGH), (1e10*theta4, True))
 f17 = sympy.Piecewise((1e10*theta5,thetak5 < DRV5_LOW), (-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < (DRV5_HIGH + DRV5_LOW)/2), (2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV5_HIGH-DRV5_LOW)*(thetak5-(DRV5_HIGH+DRV5_LOW)/2)))-1) * (theta5-thetak5)**2, thetak5 < DRV5_HIGH), (1e10*theta5, True))
 f18 = sympy.Piecewise((1e10*theta6,thetak6 < DRV6_LOW), (-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < (DRV6_HIGH + DRV6_LOW)/2), (2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV6_HIGH-DRV6_LOW)*(thetak6-(DRV6_HIGH+DRV6_LOW)/2)))-1) * (theta6-thetak6)**2, thetak6 < DRV6_HIGH), (1e10*theta6, True))
-f18 = thetak6
+# f18 = thetak6
 f19 = sympy.Piecewise((1e10*theta7,thetak7 < DRV7_LOW), (-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b7/(sympy.exp(w_a*(1+2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < (DRV7_HIGH + DRV7_LOW)/2), (2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)*w_b7/(sympy.exp(w_a*(1-2/(DRV7_HIGH-DRV7_LOW)*(thetak7-(DRV7_HIGH+DRV7_LOW)/2)))-1) * (theta7-thetak7)**2, thetak7 < DRV7_HIGH), (1e10*theta7, True))
 f20 = sympy.Piecewise((1e10*theta8,thetak8 < DRV8_LOW), (-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1+2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < (DRV8_HIGH + DRV8_LOW)/2), (2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)*w_b/(sympy.exp(w_a*(1-2/(DRV8_HIGH-DRV8_LOW)*(thetak8-(DRV8_HIGH+DRV8_LOW)/2)))-1) * (theta8-thetak8)**2, thetak8 < DRV8_HIGH), (1e10*theta8, True))
 f21 = sympy.sqrt(theta1**2+theta2**2+theta3**2+theta4**2+theta5**2+theta6**2+theta7**2+theta8**2) \
      -sympy.sqrt(thetak1**2+thetak2**2+thetak3**2+thetak4**2+thetak5**2+thetak6**2+thetak7**2+thetak8**2)
 # f18 = theta6 - 0.3 - 1.5707
 # f19 = theta7 - 0.06
-# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12])
-funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20])
+funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12])
+# funcs = sympy.Matrix([f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20])
 res = funcs.jacobian(args)
 # resh = sympy.hessian(funcs,args)
 start_time4 = time()
@@ -357,7 +357,7 @@ num_i = [np.array([])]
 # p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=[ 0.5  ,  0.7 ,  1.0 ,  2.6 , -0.8 ,  0.3 , -0.06,  0.5 ,0,0,0])
 
 # %%
-# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/jump6_ok6.mp4")
+# log_id = p.startStateLogging(p.STATE_LOGGING_VIDEO_MP4, "/home/lihui.liu//mnt/workspace/python/robot/vedio/no_noise_low1.mp4")
 
 for j in range(1000):
 # for time_sin in range(240):
@@ -388,6 +388,8 @@ for j in range(1000):
     end_point_k = np.matmul(end_point_k, T_x)
     # end_point_k = end_point[i]
     
+    noise = np.random.uniform(-0.01, 0.01, 8)
+    theta_i = theta_i + noise
     theta_i[5] = theta_i[5] + np.pi/2
     # joint_T_v = joint_T_np(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7])
     # test_end_point_k = np.dot(joint_T_v,[0,0,-0.5,1])
@@ -397,7 +399,7 @@ for j in range(1000):
     # theta_ik = theta_i + noise
     theta_ik = theta_i
     # theta_ik[0:3,] = theta_ik[0:3,] + noise
-    p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=1)
+    p.addUserDebugLine(end_pos_new_1[0:3,3], end_pos_new[0:3,3], lineColorRGB=[0.3,0.2,0.6], lineWidth=3)
     # p.addUserDebugPoints(pointPositions=[test_end_point_k[0:3]], pointColorsRGB=[[0.3,1,0]], pointSize=5)
     end_pos_new_1 = end_pos_new
     # start_time2 = time()
@@ -408,7 +410,7 @@ for j in range(1000):
         theta_ik[0],theta_ik[1],theta_ik[2],theta_ik[3],theta_ik[4],theta_ik[5],theta_ik[6],theta_ik[7])
     k = 0
     err_robot = 0
-    for i in range(300):
+    for i in range(5000):
         err_robot_old = err_robot
         JointJacobian = f_jacobian(theta_i[0],theta_i[1],theta_i[2],theta_i[3],theta_i[4],theta_i[5],theta_i[6],theta_i[7],\
             end_point_k[0][0],end_point_k[0][1],end_point_k[0][2],end_point_k[0][3],\
@@ -437,14 +439,14 @@ for j in range(1000):
         # err_robot = np.linalg.norm(f_theta_i,2)
         err_lim = 0
         err_d = 0
-        err_lim = np.linalg.norm(f_theta_i[12:-1],2)
+        # err_lim = np.linalg.norm(f_theta_i[12:-1],2)
         # err_d = f_theta_i[-1]
         err_list.append(err_robot)
         err_limlist.append(err_lim)
         theta_i_list.append(theta_i)
         # print(theta_i)
         # print(err_robot)
-        if err_robot < 5e-3 and err_lim < 1e-2 and err_d < 1:
+        if err_robot < 5e-6 and err_lim < 1e-2 and err_d < 1:
         # if err_robot < 3e-3 :
             # print('+' * 50)
             # print('i = ',i)
@@ -464,6 +466,10 @@ for j in range(1000):
     num_i = np.append(num_i,values=i)
     # np.concatenate(num_i,i)
     theta_i[5] = theta_i[5] - np.pi/2
+    if not(DRV1_LOW < theta1_0 < DRV1_HIGH and DRV2_LOW < theta2_0 < DRV2_HIGH and DRV3_LOW < theta3_0 < DRV3_HIGH and \
+        DRV4_LOW < theta4_0 < DRV4_HIGH and DRV5_LOW < theta5_0[0,0] < DRV5_HIGH and DRV6_LOW < theta6_0[0,0] < DRV6_HIGH):
+        print('*************limit***************')
+        break
     # print(theta_i)
     # theta_ik = theta_i
     # noise = np.random.normal(loc=0.0, scale=0.002, size=8)
@@ -476,6 +482,7 @@ for j in range(1000):
     end_pos_new = DHParameter().DH_compute(Joint_pos_new)
     p.setJointMotorControlArray(robot_id,range(11),p.POSITION_CONTROL,targetPositions=Joint_pos_new)
     sleep(1./240.)
+    # theta_i = [0,0,0,0,0,0,0,0]
     # j = j+1
 # p.stopStateLogging(log_id)
 theta_i[5] = theta_i[5] - np.pi/2
