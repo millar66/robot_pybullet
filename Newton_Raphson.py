@@ -11,6 +11,7 @@ import math
 
 x = np.linspace(-10,10,400)
 y = 3 * x**3 + 5 * x**2 + 7.25
+y = x**4 + x**3 - x**2 -x
 dy = 9 * x**2 + 10 * x
 plt.plot(x,y)
 plt.plot(x,dy)
@@ -20,6 +21,7 @@ x_0 = 10
 x = x_0
 for i in range(100):
     y = 3 * x**3 + 5 * x**2 + 7.25
+    y = x**4 + x**3 - x**2 -x
     dy = 9 * x**2 + 10 * x
     x = x - (y/dy)
     if abs(y) < 0.0001:
