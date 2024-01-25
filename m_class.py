@@ -988,6 +988,11 @@ class robot_control :
         joint_velocities = [state[1] for state in joint_states]
         joint_torques = [state[3] for state in joint_states]
         return joint_positions, joint_velocities, joint_torques
+    
+class state_est:
+    def byess(u,delt,x):
+        return (1/np.sqrt(2*np.pi*delt))*np.exp(-(x-u)**2/(2*delt))
+    
 class CameraOperate :
     
     def __init__(self, robot_id : int, width : int = 224, height : int = 224, physicsClientId : int = 0):

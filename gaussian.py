@@ -12,18 +12,20 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import axes3d
 
 t_symple = 0.04
-x = np.arange(-10, 10, t_symple)
-
+x = np.arange(-0, 30, t_symple)
+# y = np.arange(-0, 30, t_symple)
 # a = A; b = avg;
-b1 = 0.8
-c1 = 2
-a1 = 1/np.sqrt(2*np.pi*c1**2)
-y1 = a1*np.exp(-(x-b1)**2/(2*c1**2))
+u1 = 1.818
+delt1 = 0.09
+y1 = (1/np.sqrt(2*np.pi*delt1))*np.exp(-(2.818-40/x)**2/(2*delt1))
 
-b2 = 3
-c2 = 1.8
-a2 = 1/np.sqrt(2*np.pi*c2**2)
-y2 = a2*np.exp(-(x-b2)**2/(2*c2**2))
+u2 = 20
+delt2 = 9
+y2 = (1/np.sqrt(2*np.pi*delt2))*np.exp(-(x-u2)**2/(2*delt2))
+
+p_x = (1/np.sqrt(2*np.pi*delt2))*np.exp(-(20-u2)**2/(2*delt2))
+
+y3 = y1*y2*6
 
 p_x1_sum = 0
 for i in y1:
@@ -37,21 +39,20 @@ for i in y2:
 p_x2_sum = p_x2_sum * t_symple
 print(p_x2_sum)
 
-y3 = y1*y2
 
 y4 = np.exp((y1)*2)/4 + (y1)**2 + np.log(y1)/20
 
-G4 = (np.exp((b1)*2)/2 + 2*(b1) + 1/(b1*np.log(b1)*20))
-y5 = ((np.exp((b1)*2)/4+(b1)**2+np.log(b1)/20) + G4 * (y1-b1))
+# G4 = (np.exp((b1)*2)/2 + 2*(b1) + 1/(b1*np.log(b1)*20))
+# y5 = ((np.exp((b1)*2)/4+(b1)**2+np.log(b1)/20) + G4 * (y1-b1))
 
 plt.xlabel('x')
 plt.ylabel('y')
 plt.title("pos")
-# plt.plot(x, y1)
-# plt.plot(x, y2)
-# plt.plot(x, y3)
-plt.plot(x, y4)
-plt.plot(x, y5)
+# plt.plot(x, y1, 'b')
+plt.plot(x, y2, 'r')
+plt.plot(x, y3)
+# plt.plot(x, y4)
+# plt.plot(x, y5)
 plt.show()
 
 # shannon information
